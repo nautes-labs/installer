@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+ansible-playbook -e @/opt/vars.yaml /opt/nautes/terraform.yml
+ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/nautes/wait-for-host-ready.yaml
+ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/kubespray/cluster.yml
+ansible-playbook -i /opt/out/hosts/ansible_hosts -e @/opt/vars.yaml /opt/nautes/install.yaml

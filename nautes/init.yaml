@@ -1,0 +1,129 @@
+- hosts: all
+  tasks:
+    - name: Set hostname to inventory name
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+- hosts: localhost
+  tasks:
+  - name: Create output folder
+    file:
+      path: "{{ item }}"
+      state: directory
+    loop:
+    - "{{ output_folder }}/"
+    - "{{ output_folder_pki }}/"
+    - "{{ output_folder_k8s }}/"
+    - "{{ output_folder_gitrepo }}/"
+    - "{{ output_folder_secrepo }}/"
+    - "{{ output_folder_service }}"
+
+  - name: Create service files
+    template:
+      src: "url.yaml"
+      dest: "{{ output_folder_service }}"
+
+  - name: Generate private key
+    openssl_privatekey:
+      path: "{{ output_folder_pki }}/ca.pem"
+      size: 4096
+      type: RSA
+
+  - name: create the CA CSR
+    openssl_csr:
+      path: "{{ output_folder_pki }}/ca.csr"
+      privatekey_path: "{{ output_folder_pki }}/ca.pem"
+      common_name: "nautes.io"
+      basic_constraints:
+        - 'CA:TRUE'
+      basic_constraints_critical: true
+      key_usage:
+        - keyCertSign
+        - cRLSign
+      key_usage_critical: true
+
+  - name: Generate CA
+    community.crypto.x509_certificate:
+      path: "{{ output_folder_pki }}/ca.crt"
+      csr_path: "{{ output_folder_pki }}/ca.csr"
+      privatekey_path: "{{ output_folder_pki }}/ca.pem"
+      provider: selfsigned
+
+  - name: Generate keypair
+    include_tasks: generate_keypair.yaml
+    vars:
+        hostname: "{{ item }}"
+    loop: "{{ groups['gitlab'] }}"
+
+  - name: Generate keypair
+    include_tasks: generate_keypair.yaml
+    vars:
+        hostname: "{{ item }}"
+    loop: "{{ groups['vault'] }}"
+
+  - name: Output hostname
+    set_fact:
+      operators:
+        - API
+        - CLUSTER
+        - RUNTIME
+  
+  - name: Generate vault proxy client private key
+    openssl_privatekey:
+      path: "{{ output_folder_pki }}/{{ item }}.key"
+      size: 4096
+      type: RSA
+    loop: "{{ operators }}"
+   
+  - community.crypto.openssl_csr:
+      path: "{{ output_folder_pki }}/{{ item }}.csr"
+      privatekey_path: "{{ output_folder_pki }}/{{ item }}.key"
+      common_name: "{{ item }}"
+      keyUsage:
+        - digitalSignature
+        - nonRepudiation
+        - keyEncipherment
+        - dataEncipherment
+      extendedKeyUsage:
+        - clientAuth
+    loop: "{{ operators }}"
+  
+  - name: Generate vault proxy client public key
+    community.crypto.x509_certificate:
+      path: "{{ output_folder_pki }}/{{ item }}.crt"
+      csr_path: "{{ output_folder_pki }}/{{ item }}.csr"
+      privatekey_path: "{{ output_folder_pki }}/{{ item }}.key"
+      ownca_path: "{{ output_folder_pki }}/ca.crt"
+      ownca_privatekey_path: "{{ output_folder_pki }}/ca.pem"
+      provider: ownca
+    loop: "{{ operators }}"
+
+  - name: Generate entyrpoint private key
+    openssl_privatekey:
+      path: "{{ output_folder_pki }}/entrypoint.key"
+      size: 4096
+      type: RSA
+   
+  - community.crypto.openssl_csr:
+      path: "{{ output_folder_pki }}/entrypoint.csr"
+      privatekey_path: "{{ output_folder_pki }}/entrypoint.key"
+      common_name: "nautes"
+      subject_alt_name: 
+        - "DNS:*.{{ kube_entrypoint_domain }}"
+      keyUsage:
+        - digitalSignature
+        - nonRepudiation
+        - keyEncipherment
+        - dataEncipherment
+      extendedKeyUsage:
+        - serverAuth
+  
+  - name: Generate entrypoint public key
+    community.crypto.x509_certificate:
+      path: "{{ output_folder_pki }}/entrypoint.crt"
+      csr_path: "{{ output_folder_pki }}/entrypoint.csr"
+      privatekey_path: "{{ output_folder_pki }}/entrypoint.key"
+      ownca_path: "{{ output_folder_pki }}/ca.crt"
+      ownca_privatekey_path: "{{ output_folder_pki }}/ca.pem"
+      provider: ownca
+

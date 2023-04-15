@@ -1,0 +1,29 @@
+ports:
+  web:
+    nodePort: "{{ ingress_http_port }}"
+  websecure:
+    nodePort: "{{ ingress_https_port }}"
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: tls-cert
+
+service:
+  type: NodePort
+
+providers:
+  kubernetesIngress:
+    enabled: true
+    allowExternalNameServices: true
+    allowEmptyServices: false
+    # ingressClass: traefik-internal
+    # labelSelector: environment=production,method=traefik
+    namespaces: []
+      # - "default"
+    # IP used for Kubernetes Ingress endpoints
+    publishedService:
+      enabled: true
+      # Published Kubernetes Service to copy status from. Format: namespace/servicename
+      # By default this Traefik service
+      # pathOverride: ""

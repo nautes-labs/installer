@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: "{{ tenant_name }}-management"
+  namespace: argocd
+spec:
+  project: "{{ tenant_name }}"
+  source:
+    path: tenant/production
+    repoURL: "{{ tenant_repo_ssh_addr }}"
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+

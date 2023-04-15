@@ -1,0 +1,10 @@
+---
+- name: Init vault
+  hosts: localhost
+  roles:
+    - vault-init
+
+- name: Init vault proxy
+  hosts: vault
+  roles:
+    - vault-proxy

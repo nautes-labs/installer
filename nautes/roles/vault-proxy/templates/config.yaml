@@ -1,0 +1,27 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+    cert:
+      ca_cert: /data/conf/ca/ca.crt
+      cert_file: /data/conf/ca/localhost.crt
+      key_file: /data/conf/ca/localhost.key
+  authorization:
+    resource:
+      acl: /data/conf/casbin/resource_acl.csv
+    permission:
+      acl: /data/conf/casbin/permission_acl.csv
+  nautes:
+    tenant_name:
+    - {{ tenant_name }}
+data:
+  vault:
+    addr: "https://127.0.0.1:8200"
+    authPath: vault-proxy
+    roleID: {{ role_id }}
+    secretID: {{ secret_id }}
+    cert:
+      ca_cert: /data/conf/ca/ca.crt
+  zipkin:
+    url: "http://127.0.0.1:9411/api/v2/spans"
+

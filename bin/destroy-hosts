@@ -1,0 +1,3 @@
+#!/bin/sh
+
+terraform -chdir=/tmp/terraform/ destroy --auto-approve

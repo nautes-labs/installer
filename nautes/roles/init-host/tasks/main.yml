@@ -1,0 +1,34 @@
+- name: Ensure destination directory exists
+  file:
+    path: /tmp/terraform
+    state: directory
+
+- name: Create output folder
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+  - "{{ output_folder }}/"
+  - "{{ output_folder_hosts }}/"
+
+- name: Create login keypair
+  openssh_keypair:
+    path: "{{ output_folder_hosts }}/id_rsa"
+    size: 2048
+ 
+- name: Copy host template
+  copy:
+    src: ansible-host.tftpl
+    dest: /tmp/terraform
+
+- name: Create file from template
+  template:
+    src: main.tf.j2
+    dest: /tmp/terraform/main.tf
+
+- name: Create instance
+  ansible.builtin.shell:
+    chdir: /tmp/terraform
+    cmd: terraform init && terraform apply -auto-approve
+
+

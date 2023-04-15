@@ -1,0 +1,35 @@
+vcluster:
+  image: rancher/k3s:v1.21.13-k3s1
+sync:
+  ingresses:
+    enabled: true
+syncer:
+  extraArgs:
+  - --tls-san={{ hostvars[groups['kube_control_plane'][0]].ansible_host }}
+init:
+  manifests: |-
+    ---
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: vault
+    ---
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: vault-auth
+      namespace: vault
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRoleBinding
+    metadata:
+      name: role-tokenreview-binding
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: system:auth-delegator
+    subjects:
+      - kind: ServiceAccount
+        name: vault-auth
+        namespace: vault
+

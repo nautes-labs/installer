@@ -1,0 +1,4 @@
+#!/bin/sh
+
+ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/nautes/wait-for-host-ready.yaml
+ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/kubespray/cluster.yml

@@ -1,0 +1,21 @@
+p, API, git/*, ARGO, allow
+
+p, CLUSTER, git/data/gitlab/repo-{{ tenant_repo_id }}/default/readonly, ARGO, allow
+p, CLUSTER, cluster/*, RUNTIME, allow
+
+p, RUNTIME, git/*, API, deny
+p, RUNTIME, git/*, ARGO, allow
+p, RUNTIME, git/*, BASE, deny
+p, RUNTIME, git/*, CLUSTER, deny
+p, RUNTIME, git/*, REPO, deny
+p, RUNTIME, git/*, RUNTIME, deny
+p, RUNTIME, git/*, *, allow
+
+p, RUNTIME, repo/*, API, deny
+p, RUNTIME, repo/*, ARGO, deny
+p, RUNTIME, repo/*, BASE, deny
+p, RUNTIME, repo/*, CLUSTER, deny
+p, RUNTIME, repo/*, REPO, deny
+p, RUNTIME, repo/*, RUNTIME, deny
+p, RUNTIME, repo/*, *, allow
+

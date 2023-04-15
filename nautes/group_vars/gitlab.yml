@@ -1,0 +1,22 @@
+gitlab_domain: "{{ gitlab_ip }}"
+
+gitlab_create_self_signed_cert: false
+gitlab_ssl_certificate: "/etc/gitlab/ssl/{{ inventory_hostname }}.crt"
+gitlab_ssl_certificate_key: "/etc/gitlab/ssl/{{ inventory_hostname }}.key"
+
+gitlab_extra_settings:
+  - gitlab_rails:
+    - key: gitlab_ssh_host 
+      value: '{{ gitlab_ip }}'
+    - key: gitlab_shell_ssh_port
+      value: "{{ gitlab_ssh_port }}"
+  - grafana:
+    - key: enable
+      value: 'false'
+      type: 'plain'
+  - prometheus_monitoring:
+    - key: enable
+      value: 'false'
+      type: 'plain'
+    
+

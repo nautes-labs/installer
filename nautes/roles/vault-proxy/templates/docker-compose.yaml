@@ -1,0 +1,14 @@
+services:
+  proxy:
+    image: "ghcr.io/nautes-labs/vault-proxy:0.1.0"
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:8000/health"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    network_mode: "host"
+    volumes:
+    - "/opt/vault-proxy/configs:/data/conf"
+

@@ -1,0 +1,7 @@
+vault_address: "0.0.0.0"
+vault_tls_disable: '0'
+vault_tls_certs_path: '/etc/vault.d/pki'
+vault_tls_cert_file: 'vault.crt'
+vault_tls_private_path: '/etc/vault.d/pki'
+vault_tls_key_file: 'vault.key'
+vault_disable_api_health_check: true

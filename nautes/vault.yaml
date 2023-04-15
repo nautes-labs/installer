@@ -1,0 +1,65 @@
+---
+- name: Install Vault Vagrant Development Server
+  hosts: vault
+  any_errors_fatal: true
+  roles:
+    - {role: ansible-vault, vault_backend: file}
+  tasks:
+    - name: Create CA path 
+      file:
+        path: "{{ item }}"
+        owner: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+        state: directory
+      loop:
+      - "{{ vault_tls_certs_path }}"
+      - "{{ vault_tls_private_path }}"
+
+    - name: Copy keypair from local to remote
+      copy:
+        src: "{{ output_folder_pki }}/{{ item.src }}"
+        dest: "{{ item.dst }}"
+        owner: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+        mode: '0400'
+      loop:
+      - { src: "{{ inventory_hostname }}.key", dst: "{{ vault_tls_private_path }}/{{ vault_tls_key_file }}" }
+      - { src: "{{ inventory_hostname }}.crt", dst: "{{ vault_tls_certs_path }}/{{ vault_tls_cert_file }}" }
+
+    - name: Install packages that allow apt to be used over HTTPS
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+        state: present
+      register: apt_res
+      until: apt_res is success
+      retries: 12
+      delay: 10
+
+    - name: Add Docker’s official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker apt repository.
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+
+    - name: Install Docker CE.
+      apt:
+        name: 
+          - docker-ce
+          - docker-compose
+        state: present
+
+    - name: Restart vault
+      systemd:
+        name: vault
+        state: started
+
+

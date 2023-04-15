@@ -1,0 +1,8 @@
+vcluster_api_port: 32000
+ingress_http_port: 31080
+ingress_https_port: 31443
+
+operators:
+  - API
+  - CLUSTER
+  - RUNTIME

@@ -1,0 +1,9 @@
+template_path: /opt/management
+api_server_image: ghcr.io/nautes-labs/api-server:v0.2.0
+argo_operator_image: ghcr.io/nautes-labs/argo-operator:v0.2.0
+base_operator_image: ghcr.io/nautes-labs/base-operator:v0.2.0
+cluster_operator_image: ghcr.io/nautes-labs/cluster-operator:v0.2.0
+runtime_operator_image: ghcr.io/nautes-labs/runtime-operator:v0.2.0
+webhook_image: ghcr.io/nautes-labs/webhook:v0.2.0
+
+runtime_template_source: ""

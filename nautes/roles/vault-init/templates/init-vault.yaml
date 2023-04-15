@@ -1,0 +1,286 @@
+host: "{{ vault_url }}"
+ca: ""                # if ca is set, capath will be ignore
+capath: "{{ output_folder_pki }}/ca.crt"
+token: "{{ vault_root_token }}"            # vault root token
+# ================================================================
+kvEngineList:
+- name: pki
+  kvList:
+  - path: "default"
+    kvs:
+      "cacert": |
+{{ ca_cert | indent( width=8, indentfirst=True) }}
+- name: git
+  kvList:
+  - path: "gitlab/repo-{{ tenant_repo_id }}/default/readonly"
+    kvs: 
+      "deploykey": |
+{{ tenant_repo_deploykey | indent( width=8, indentfirst=True) }}
+- name: repo
+- name: cluster
+- name: tenant
+  kvList:
+  - path: "git/gitlab-nautes/root" 
+    kvs: 
+      "access_token": "{{ root_access_token }}"
+  - path: "repo/harbor/root"
+    kvs: 
+      "username": "replace to the root username"
+      "password": "replace to the real password"
+# ================================================================
+appRoleList:
+- name: "vault-proxy"
+  roleName: "vault-proxy"
+  policy: "vault-proxy"
+  boundCIDR: "127.0.0.1/32"
+  
+authList:
+- name: "{{ tenant_name }}"
+  k8sServiceAccount:
+    name: "vault-auth"
+    namespace: vault
+# ================================================================
+roleList:
+- name: api
+  authName: "{{ tenant_name }}"
+  policies:
+  - api-server
+  k8sServiceAccountList:
+  - name: api-server-manager
+    namespace: nautes
+
+- name: argo
+  authName: "{{ tenant_name }}"
+  policies:
+  - argo-operator
+  k8sServiceAccountList:
+  - name: argo-controller-manager
+    namespace: nautes
+
+- name: base
+  authName: "{{ tenant_name }}"
+  policies:
+  - base-operator
+  k8sServiceAccountList:
+  - name: base-controller-manager
+    namespace: nautes
+
+- name: cluster
+  authName: "{{ tenant_name }}"
+  policies:
+  - cluster-operator
+  k8sServiceAccountList:
+  - name: cluster-controller-manager
+    namespace: nautes
+
+- name: repo
+  authName: "{{ tenant_name }}"
+  policies:
+  - repo-operator
+  k8sServiceAccountList:
+  - name: repo-controller-manager
+    namespace: nautes
+
+- name: runtime
+  authName: "{{ tenant_name }}"
+  k8sServiceAccountList:
+  - name: runtime-controller-manager
+    namespace: nautes
+# ================================================================
+policyList:
+- name: api-server
+  rules: |
+    path "git/data/*" {
+        capabilities = ["read"]
+    }
+
+    path "git/metadata/*" {
+        capabilities = ["read"]
+    }
+
+- name: argo-operator
+  rules: |
+    path "cluster/data/*" {
+        capabilities = ["read"]
+    }
+
+    path "cluster/metadata/*" {
+        capabilities = ["read"]
+    }
+
+    path "git/data/*" {
+        capabilities = ["read"]
+    }
+
+    path "git/metadata/*" {
+        capabilities = ["read"]
+    }
+
+- name: base-operator
+  rules: |
+    path "tenant/data/*" {
+      capabilities = ["read"]
+    }
+
+- name: cluster-operator
+  rules: |
+    path "cluster/data/*" {
+        capabilities = ["read"]
+    }
+
+    path "cluster/metadata/*" {
+        capabilities = ["read"]
+    }
+
+    path "auth/*" {
+        capabilities = ["read"]
+    }
+
+- name: repo-operator
+  rules: |
+    path "tenant/data/repo/*" {
+      capabilities = ["read"]
+    }
+  
+- name: vault-proxy
+  rules: |
+    path "sys/policies/*" {
+      capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    }
+
+    path "sys/auth/*" {
+      capabilities = ["sudo", "create", "read", "update", "patch", "delete", "list"]
+    }
+
+    path "tenant/*" {
+      capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    }
+
+    path "git/*" {
+      capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    }
+
+    path "repo/*" {
+      capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    }
+
+    path "cluster/*" {
+      capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    }
+
+    path "pki/*" {
+      capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    }
+
+    path "auth/*" {
+      capabilities = ["create", "read", "update", "patch", "delete", "list"]
+    }
+
+- name: "gitlab-repo-{{ tenant_repo_id }}-default-readonly"
+  rules: |
+    path "git/data/gitlab/repo-{{ tenant_repo_id }}/default/readonly" {
+        capabilities = ["read"]
+    }
+    
+    path "git/metadata/gitlab/repo-{{ tenant_repo_id }}/default/readonly" {
+        capabilities = ["read"]
+    }
+
+- name: default
+  rules: |
+    # Allow tokens to look up their own properties
+    path "auth/token/lookup-self" {
+        capabilities = ["read"]
+    }
+    
+    # Allow tokens to renew themselves
+    path "auth/token/renew-self" {
+        capabilities = ["update"]
+    }
+    
+    # Allow tokens to revoke themselves
+    path "auth/token/revoke-self" {
+        capabilities = ["update"]
+    }
+    
+    # Allow a token to look up its own capabilities on a path
+    path "sys/capabilities-self" {
+        capabilities = ["update"]
+    }
+    
+    # Allow a token to look up its own entity by id or name
+    path "identity/entity/id/{% raw %}{{identity.entity.id}}{% endraw %}" {
+      capabilities = ["read"]
+    }
+    path "identity/entity/name/{% raw %}{{identity.entity.name}}{% endraw %}" {
+      capabilities = ["read"]
+    }
+    
+    
+    # Allow a token to look up its resultant ACL from all policies. This is useful
+    # for UIs. It is an internal path because the format may change at any time
+    # based on how the internal ACL features and capabilities change.
+    path "sys/internal/ui/resultant-acl" {
+        capabilities = ["read"]
+    }
+    
+    # Allow a token to renew a lease via lease_id in the request body; old path for
+    # old clients, new path for newer
+    path "sys/renew" {
+        capabilities = ["update"]
+    }
+    path "sys/leases/renew" {
+        capabilities = ["update"]
+    }
+    
+    # Allow looking up lease properties. This requires knowing the lease ID ahead
+    # of time and does not divulge any sensitive information.
+    path "sys/leases/lookup" {
+        capabilities = ["update"]
+    }
+    
+    # Allow a token to manage its own cubbyhole
+    path "cubbyhole/*" {
+        capabilities = ["create", "read", "update", "delete", "list"]
+    }
+    
+    # Allow a token to wrap arbitrary values in a response-wrapping token
+    path "sys/wrapping/wrap" {
+        capabilities = ["update"]
+    }
+    
+    # Allow a token to look up the creation time and TTL of a given
+    # response-wrapping token
+    path "sys/wrapping/lookup" {
+        capabilities = ["update"]
+    }
+    
+    # Allow a token to unwrap a response-wrapping token. This is a convenience to
+    # avoid client token swapping since this is also part of the response wrapping
+    # policy.
+    path "sys/wrapping/unwrap" {
+        capabilities = ["update"]
+    }
+    
+    # Allow general purpose tools
+    path "sys/tools/hash" {
+        capabilities = ["update"]
+    }
+    path "sys/tools/hash/*" {
+        capabilities = ["update"]
+    }
+    
+    # Allow checking the status of a Control Group request if the user has the
+    # accessor
+    path "sys/control-group/request" {
+        capabilities = ["update"]
+    }
+    
+    # Allow a token to make requests to the Authorization Endpoint for OIDC providers.
+    path "identity/oidc/provider/+/authorize" {
+    	capabilities = ["read", "update"]
+    }
+    
+    path "pki/*" {
+      capabilities = ["read", "list"]
+    }

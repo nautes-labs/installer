@@ -1,0 +1,140 @@
+- set_fact:
+    entrypoint_crt: "{{ lookup('file', '{{ output_folder_pki }}/entrypoint.crt' ) | b64encode }}"
+    entrypoint_key: "{{ lookup('file', '{{ output_folder_pki }}/entrypoint.key' ) | b64encode }}"
+
+- name: Check if helm exists
+  shell: "command -v helm"
+  register: helm_exist_check
+  ignore_errors: true
+
+- block:
+  - name: Install Helm
+    get_url:
+      url: https://get.helm.sh/helm-v3.9.0-linux-amd64.tar.gz
+      dest: /tmp/helm.tar.gz
+  - name: Extract Helm
+    unarchive:
+      src: /tmp/helm.tar.gz
+      dest: /tmp/
+      remote_src: yes
+  - name: Move Helm binary to /usr/local/bin/
+    command: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+  when: helm_exist_check.rc != 0
+
+- name: Install requirment
+  ansible.builtin.pip:
+    name: kubernetes
+
+- name: Create vcluster helm value file
+  template:
+    src: "{{ item }}"
+    dest: "/tmp/"
+  loop:
+  - traefik.yaml
+  - traefik-servers-transport.yaml
+  - traefik-secret.yaml
+
+- name: Install traefik
+  kubernetes.core.helm:
+    name: "traefik"
+    chart_ref: traefik
+    chart_repo_url: https://traefik.github.io/charts
+    chart_version: v22.0.0
+    create_namespace: true
+    release_namespace: "traefik"
+    values_files:
+      - /tmp/traefik.yaml
+ 
+- name: Add traefik settings
+  kubernetes.core.k8s:
+    state: present
+    namespace: traefik
+    src: "{{ item }}"
+  loop:
+  - /tmp/traefik-servers-transport.yaml
+  - /tmp/traefik-secret.yaml
+
+- name: Create vcluster helm value file
+  template:
+    src: vcluster-value.yaml
+    dest: "/tmp/vcluster-value.yaml"
+
+- name: Create vcluster
+  kubernetes.core.helm:
+    name: "{{ tenant_name }}"
+    chart_ref: vcluster
+    chart_repo_url: https://charts.loft.sh
+    chart_version: 0.10.1
+    create_namespace: true
+    release_namespace: "{{ tenant_name }}"
+    values_files:
+      - /tmp/vcluster-value.yaml
+
+- name: Create vcluster entrypoint 
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: vcluster-entrypoint
+        namespace: "{{ tenant_name }}"
+      spec:
+        selector:
+          app: vcluster
+        ports:
+        - protocol: TCP
+          name: https
+          targetPort: 8443
+          port: 443
+          nodePort: "{{ vcluster_api_port }}"
+        type: NodePort
+
+- name: Wait until HTTP status is 403
+  uri:
+    url: 'https://{{ tenant_cluster_apiserver_url }}'
+    return_content: yes
+    validate_certs: no
+    status_code:
+      - 403
+  until: uri_output.status == 403
+  retries: 120 
+  delay: 5 # Every 5 seconds
+  register: uri_output
+
+- name: Get vcluster kubeconfig
+  k8s_info:
+    kind: Secret
+    name: "vc-{{ tenant_name}}"
+    namespace: "{{ tenant_name }}"
+  register: vcluster_kubeconfig
+
+- debug:
+    var: vcluster_kubeconfig
+
+- name: Create kubernetes config path
+  file:
+    path: "~/.kube"
+    state: directory
+  delegate_to: localhost
+
+- name: Save kubeconfig in local
+  shell: "echo {{ vcluster_kubeconfig.resources[0].data.config }}| base64 -d > ~/.kube/config "
+  delegate_to: localhost
+
+- name: Replace localhost with remote machine IP in local file
+  replace:
+    path: ~/.kube/config
+    regexp: localhost\:8443
+    replace: "{{ tenant_cluster_apiserver_url }}"
+  delegate_to: localhost
+
+- name: Copy kubeconfig to out
+  copy:
+    src: ~/.kube/config
+    dest: "{{ output_folder_k8s }}/vcluster.config"
+  delegate_to: localhost
+
+- name: Install nautes
+  import_tasks: install_nautes_runtime.yaml
+  delegate_to: localhost

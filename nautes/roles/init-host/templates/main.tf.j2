@@ -1,0 +1,204 @@
+provider "alicloud" {
+  access_key = "{{ access_key }}"
+  secret_key = "{{ secret_key }}"
+  region     = "{{ region_id }}"
+}
+
+resource "alicloud_vpc" "default" {
+  vpc_name       = "nautes-vpc"
+  cidr_block     = "10.0.0.0/8"
+}
+
+resource "alicloud_vswitch" "default" {
+  vpc_id            = alicloud_vpc.default.id
+  cidr_block        = "10.0.1.0/24"
+  zone_id           = "{{ zone_id }}"
+}
+
+resource "alicloud_security_group" "default" {
+  name        = "nautes-sg"
+  description = "secret group for nautes env"
+  vpc_id      = alicloud_vpc.default.id
+}
+
+resource "alicloud_security_group_rule" "ssh" {
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "intranet"
+  policy            = "accept"
+  port_range        = "22/22"
+  priority          = 1
+  security_group_id = alicloud_security_group.default.id
+  cidr_ip           = "0.0.0.0/0"
+}
+
+resource "alicloud_security_group_rule" "kube-apiserver" {
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "intranet"
+  policy            = "accept"
+  port_range        = "6443/6443"
+  priority          = 1
+  security_group_id = alicloud_security_group.default.id
+  cidr_ip           = "0.0.0.0/0"
+}
+
+resource "alicloud_security_group_rule" "https" {
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "intranet"
+  policy            = "accept"
+  port_range        = "{{ gitlab_port }}/{{ gitlab_port }}"
+  priority          = 1
+  security_group_id = alicloud_security_group.default.id
+  cidr_ip           = "0.0.0.0/0"
+}
+
+resource "alicloud_security_group_rule" "vault-proxy" {
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "intranet"
+  policy            = "accept"
+  port_range        = "8000/8000"
+  priority          = 1
+  security_group_id = alicloud_security_group.default.id
+  cidr_ip           = "0.0.0.0/0"
+}
+
+resource "alicloud_security_group_rule" "vault" {
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "intranet"
+  policy            = "accept"
+  port_range        = "{{ vault_port }}/{{ vault_port }}"
+  priority          = 1
+  security_group_id = alicloud_security_group.default.id
+  cidr_ip           = "0.0.0.0/0"
+}
+
+resource "alicloud_security_group_rule" "kube-nodeport" {
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "intranet"
+  policy            = "accept"
+  port_range        = "30000/33000"
+  priority          = 1
+  security_group_id = alicloud_security_group.default.id
+  cidr_ip           = "0.0.0.0/0"
+}
+
+resource "alicloud_ecs_key_pair" "root" {
+  key_pair_name = "root-keypair"
+  public_key    = file("{{ output_folder_hosts }}/id_rsa.pub")
+}
+
+resource "alicloud_instance" "gitlab" {
+  count = 1
+
+  instance_name = "gitlab-${count.index}"
+  image_id      = "ubuntu_22_04_x64_20G_alibase_20230208.vhd"
+  instance_type = "{{ gitlab_instance_type }}"
+  security_groups = [alicloud_security_group.default.id]
+  vswitch_id = alicloud_vswitch.default.id
+
+  instance_charge_type = "PostPaid"
+{% if alicloud.save_money %}
+  spot_strategy        = "SpotWithPriceLimit"
+  spot_price_limit     = "0.4"
+{% endif %}
+
+  system_disk_category = "cloud_efficiency"
+  system_disk_size     = 40
+
+  internet_max_bandwidth_out = 50
+
+  key_name = alicloud_ecs_key_pair.root.key_pair_name
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}
+
+resource "alicloud_instance" "kubernetes" {
+  count = 3
+
+  instance_name = "k8s-${count.index}"
+  image_id      = "ubuntu_22_04_x64_20G_alibase_20230208.vhd"
+  instance_type = "{{ kubernetes_instance_type }}"
+  security_groups = [alicloud_security_group.default.id]
+  vswitch_id = alicloud_vswitch.default.id
+
+  instance_charge_type = "PostPaid"
+{% if alicloud.save_money %}
+  spot_strategy        = "SpotWithPriceLimit"
+  spot_price_limit     = "0.4"
+{% endif %}
+
+  system_disk_category = "cloud_efficiency"
+  system_disk_size     = 40
+
+  internet_max_bandwidth_out = 1
+
+  key_name = alicloud_ecs_key_pair.root.key_pair_name
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}
+
+resource "alicloud_instance" "vault" {
+  count = 1
+
+  instance_name = "vault-${count.index}"
+  image_id      = "ubuntu_22_04_x64_20G_alibase_20230208.vhd"
+  instance_type = "{{ vault_instance_type }}"
+  security_groups = [alicloud_security_group.default.id]
+  vswitch_id = alicloud_vswitch.default.id
+
+  instance_charge_type = "PostPaid"
+{% if alicloud.save_money %}
+  spot_strategy        = "SpotWithPriceLimit"
+  spot_price_limit     = "0.4"
+{% endif %}
+
+  system_disk_category = "cloud_efficiency"
+  system_disk_size     = 40
+
+  internet_max_bandwidth_out = 1
+
+  key_name = alicloud_ecs_key_pair.root.key_pair_name
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}
+
+locals {
+  gitlab_ips = [
+    for instance in alicloud_instance.gitlab :
+    "${instance.instance_name} ansible_host=${instance.public_ip}"
+  ]
+
+  kubernetes_ips = [
+    for instance in alicloud_instance.kubernetes :
+    "${instance.instance_name} ansible_host=${instance.public_ip}"
+  ]
+
+  kubernetes_hosts = [
+    for instance in alicloud_instance.kubernetes :
+    "${instance.instance_name}"
+  ]
+
+  vault_ips = [
+    for instance in alicloud_instance.vault :
+    "${instance.instance_name} ansible_host=${instance.public_ip}"
+  ]
+}
+
+resource "local_file" "ansible_hosts" {
+  content  = templatefile("ansible-host.tftpl", { gitlabs = local.gitlab_ips, kubernetes = local.kubernetes_ips, kubernetes_hosts = local.kubernetes_hosts, vaults = local.vault_ips })
+  filename = "/opt/out/hosts/ansible_hosts"
+}

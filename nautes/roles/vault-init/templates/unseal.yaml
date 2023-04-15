@@ -1,0 +1,2 @@
+host: "{{ vault_url }}"
+capath: "{{ output_folder_pki }}/ca.crt"

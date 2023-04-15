@@ -1,0 +1,151 @@
+- set_fact:
+    tenant_repo_ssh_addr: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_ssh_addr' ) }}"
+    gitlab_knowhost_rsa: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_rsa_key.pub' ) }}"
+    gitlab_knowhost_ecdsa: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_ecdsa_key.pub' ) }}"
+    gitlab_knowhost_ed25519: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_ed25519_key.pub' ) }}"
+    oauth_clientID: "{{ lookup('file', '{{ output_folder_gitrepo }}/client_id' ) }}"
+    oauth_client_secret: "{{ lookup('file', '{{ output_folder_gitrepo }}/client_sercret' ) }}"
+    dex_client_secret: "{{ lookup('file', '{{ output_folder_k8s }}/dex_client_secret' ) }}"
+
+- name: Create output folder
+  file:
+    path: "{{ output_folder }}/argocd"
+    state: directory
+
+- name: Download file from URL
+  get_url:
+    url: https://raw.githubusercontent.com/argoproj/argo-cd/v2.4.0/manifests/install.yaml
+    dest: /tmp/argocd-install.yaml
+
+- name: Create argocd and dex resource
+  template:
+    src: "{{ item }}"
+    dest: /tmp/
+  loop:
+    - argocd-ingress.yaml
+    - argocd-app-project.yaml
+    - argocd-app.yaml
+    - argocd-cm.yaml
+    - know_hosts.yaml
+    - dex-cm.yaml
+
+- name: Create namespaces
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ item }}"
+    state: present
+  loop:
+    - argocd
+    - dex
+    - nautes
+
+- name: Create secrets
+  import_tasks: create_secret.yaml
+
+- name: Install ArgoCD
+  kubernetes.core.k8s:
+    state: present
+    namespace: argocd
+    src: "{{ item }}"
+  loop:
+    - /tmp/argocd-install.yaml
+    - /tmp/argocd-ingress.yaml
+    - /tmp/argocd-app-project.yaml
+    - /tmp/argocd-app.yaml
+
+- name: Update argocd configs
+  kubernetes.core.k8s:
+    state: present
+    namespace: argocd
+    src: "{{ item }}"
+  loop:
+    - /tmp/argocd-cm.yaml
+    - /tmp/know_hosts.yaml
+
+
+- name: Update dex config
+  kubernetes.core.k8s:
+    state: present
+    namespace: dex
+    src: "{{ item }}"
+  loop:
+    - /tmp/dex-cm.yaml
+
+- name: Add Service options to argocd service
+  k8s:
+    state: present
+    kind: Service
+    name: argocd-server
+    namespace: argocd
+    definition:
+      metadata:
+        annotations:
+          traefik.ingress.kubernetes.io/service.serverstransport: traefik-default@kubernetescrd
+
+- name: Wait until HTTP status is 200
+  uri:
+    url: '{{ argocd_api_url }}'
+    return_content: yes
+    validate_certs: no
+    status_code:
+      - 200
+  until: uri_output.status == 200
+  retries: 120 
+  delay: 5 # Every 5 seconds
+  register: uri_output
+
+- name: Get argocd admin password
+  k8s_info:
+    kind: Secret
+    name: argocd-initial-admin-secret
+    namespace: argocd
+  register: argocd_admin_password_raw
+
+- name: Save kubeconfig in local
+  shell: "echo {{ argocd_admin_password_raw.resources[0].data.password }}| base64 -d > {{ argocd_admin_password_output }} "
+
+- name: Load argocd admin password
+  set_fact:
+    argocd_admin_password: "{{ lookup('file', '{{ argocd_admin_password_output }}') }}"
+    tenant_repo_resource_name: "repo-{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_id' ) }}"
+    tenant_repo_private_key: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_private.key') }}"
+
+- name: Login ArgoCD
+  uri:
+    url: "{{ argocd_api_url }}/api/v1/session"
+    method: POST
+    validate_certs: no
+    body_format: json
+    body:
+      username: admin
+      password: "{{ argocd_admin_password }}"
+    return_content: yes
+  register: login_response
+
+- name: Extract token from login response
+  set_fact:
+    argocd_token: "{{ login_response.json.token }}"
+
+- name: Add repo to ArgoCD
+  uri:
+    url: "{{ argocd_api_url }}/api/v1/repositories"
+    method: POST
+    validate_certs: no
+    headers:
+      'Authorization': 'Bearer {{ argocd_token }}'
+      'Content-Type': 'application/json'
+    body_format: json
+    body:
+      name: "{{ tenant_repo_resource_name }}"
+      repo: "{{ tenant_repo_ssh_addr }}"
+      sshPrivateKey: "{{ tenant_repo_private_key }}"
+      insecure: true
+    status_code:
+      - 200
+      - 400
+  until: uri_output.status == 200 
+  retries: 120 
+  delay: 10
+  register: uri_output
+

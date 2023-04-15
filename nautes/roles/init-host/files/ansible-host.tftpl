@@ -1,0 +1,32 @@
+[gitlab]
+%{ for host in gitlabs ~}
+${ host }
+%{ endfor ~}
+
+[kube_control_plane]
+%{ for host in kubernetes ~}
+${ host }
+%{ endfor ~}
+
+[kube_node]
+%{ for host in kubernetes_hosts ~}
+${ host }
+%{ endfor ~}
+
+[etcd]
+%{ for host in kubernetes_hosts ~}
+${ host }
+%{ endfor ~}
+
+[vault]
+%{ for host in vaults ~}
+${ host }
+%{ endfor ~}
+
+[k8s_cluster:children]
+kube_control_plane
+kube_node
+
+[all:vars]
+no_log=true
+local_path_provisioner_enabled=true

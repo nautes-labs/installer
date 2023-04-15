@@ -1,0 +1,8 @@
+p, API, ^git/.*, POST|DELETE
+p, API, ^cluster/.*, POST|DELETE
+p, API, ^tenant/repo/.*, POST|DELETE
+p, CLUSTER, ^auth/.*, POST|DELETE
+p, CLUSTER, ^cluster/.*, POST|DELETE
+p, REPO, ^repo/.*, POST|DELETE
+p, RUNTIME, ^auth/.*/role/.*, POST|DELETE
+

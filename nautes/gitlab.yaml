@@ -1,0 +1,86 @@
+- hosts: gitlab
+  roles:
+    - { role: geerlingguy.gitlab }
+  pre_tasks:
+  - name: Ensure destination directory exists
+    file:
+      path: /etc/gitlab/ssl
+      state: directory
+
+  - name: Copy keypair from local to remote
+    copy:
+      src: "{{ output_folder_pki }}/{{ item }}"
+      dest: "/etc/gitlab/ssl/"
+    loop:
+    - "{{ inventory_hostname }}.key"
+    - "{{ inventory_hostname }}.crt"
+
+  - name: Update package cache
+    apt:
+      update_cache: yes
+
+  tasks:
+  - name: Wait for GitLab start up
+    command: gitlab-ctl status
+    register: cmd_res
+    retries: 5
+    until: cmd_res.stdout_lines | reject ('search','^run') | list | count == 0
+
+  - name: Copy init root password to local
+    fetch:
+      src: "{{ item }}"
+      dest: "{{ output_folder_gitrepo }}/"
+      flat: yes
+    loop: 
+      - /etc/gitlab/initial_root_password
+      - /etc/ssh/ssh_host_rsa_key.pub
+      - /etc/ssh/ssh_host_ecdsa_key.pub
+      - /etc/ssh/ssh_host_ed25519_key.pub
+
+- hosts: gitlab
+  tasks:
+  - name: Check init token exists
+    stat:
+      path: "{{ output_folder_gitrepo }}/init_token"
+    register: init_token_file
+    delegate_to: localhost
+
+  - block: 
+    - name: Generate token
+      set_fact:
+       init_token: "{{ 1000000000 | random | to_uuid }}"
+
+    - name: Create init token
+      command: "gitlab-rails runner \"token = User.find_by_username('root').personal_access_tokens.create(scopes: ['api', 'sudo'], name: 'Init token', expires_at: Time.now + 1.days); token.set_token('{{ init_token }}'); token.save!\""
+
+    - name: Copy init root token to local
+      copy:
+        content: "{{ init_token }}"
+        dest: "{{ output_folder_gitrepo }}/init_token"
+      delegate_to: localhost
+    when: not init_token_file.stat.exists
+
+- hosts: localhost
+  tasks:
+  - set_fact:
+      init_token: "{{ lookup('file', '{{ output_folder_gitrepo }}/init_token') }}"
+
+  - name: Wait until HTTP status is 200
+    uri:
+      url: '{{ gitlab_external_url }}'
+      return_content: yes
+      validate_certs: no
+      status_code:
+        - 200
+    until: uri_output.status == 200
+    retries: 24 
+    delay: 5 
+    register: uri_output
+
+  - name: Init gitlab
+    shell: "python ./scripts/init-gitlab.py --token \"{{ init_token }}\" --gitlab_url \"{{ gitlab_external_url }}\" --group_name {{ tenant_name }} --project_name management --app_call_back_url \"{{ oauth_url }}/callback\""
+
+  - name: Change file permissions
+    file:
+      path: "{{ output_folder_gitrepo }}/tenante_repo_private.key"
+      mode: '0600'

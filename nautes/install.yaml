@@ -1,0 +1,7 @@
+---
+- import_playbook: init.yaml
+- import_playbook: gitlab.yaml
+- import_playbook: push-git.yaml
+- import_playbook: nautes.yaml
+- import_playbook: vault.yaml
+- import_playbook: vault-init.yaml

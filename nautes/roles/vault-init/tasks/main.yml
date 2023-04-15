@@ -1,0 +1,49 @@
+- set_fact:
+    tenant_repo_id: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_id' ) }}"
+    ca_cert: "{{ lookup('file', '{{ output_folder_pki }}/ca.crt' ) }}"
+    tenant_repo_deploykey: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_private.key' ) }}"
+    root_access_token: "{{ lookup('file', '{{ output_folder_gitrepo }}/access_token' ) }}"
+
+- name: Wait until HTTP status is 200
+  uri:
+    url: '{{ vault_url }}'
+    return_content: yes
+    validate_certs: no
+    status_code:
+      - 200
+  until: uri_output.status == 200
+  retries: 120 
+  delay: 5 # Every 5 seconds
+  register: uri_output
+
+- name: "check init token exists"
+  stat:
+    path: "{{ output_folder_secrepo }}/unseal.yml"
+  register: vault_token_file
+
+- block:
+  - name: Create unseal config
+    template:
+      src: "{{ item }}"
+      dest: "/tmp/"
+    loop:
+    - unseal.yaml
+  
+  - name: Unseal vault
+    shell: "/opt/bin/init-vault --vault-config /tmp/unseal.yaml unseal --export-path {{ output_folder_secrepo }}/unseal.yml"
+  when: not vault_token_file.stat.exists
+
+- name: Load root token
+  ansible.builtin.include_vars:
+    file: "{{ output_folder_secrepo }}/unseal.yml"
+
+- name: Create init config
+  template:
+    src: "{{ item }}"
+    dest: "/tmp/"
+  loop:
+  - init-vault.yaml
+
+- name: Init vault
+  shell: "/opt/bin/init-vault --vault-config /tmp/init-vault.yaml init --export-path {{ output_folder_secrepo }}/vault-proxy.yml "
+

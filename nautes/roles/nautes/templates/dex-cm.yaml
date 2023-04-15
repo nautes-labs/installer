@@ -1,0 +1,31 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: dex
+  namespace: dex
+data:
+  config.yaml: |
+    issuer: {{ oauth_url }}
+    storage:
+      type: memory
+    web:
+      http: 0.0.0.0:5556
+    connectors:
+      - type: gitlab
+        id: gitlab
+        name: GitLab
+        config:
+          baseURL: {{ oauth_source_url }}
+          clientID: {{ oauth_clientID }}
+          clientSecret: {{ oauth_client_secret }}
+          redirectURI: {{ oauth_url }}/callback
+    oauth2:
+      skipApprovalScreen: true
+
+    staticClients:
+    - id: nautes
+      redirectURIs:
+      - 'http://127.0.0.1:5555/callback'
+      - 'http://localhost:8000/callback'
+      name: 'Nautes'
+      secret: {{ dex_client_secret }}

@@ -1,0 +1,42 @@
+- name: Load root token
+  ansible.builtin.include_vars:
+    file: "{{ output_folder_secrepo }}/vault-proxy.yml"
+
+- set_fact:
+    tenant_repo_id: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_id' ) }}"
+    role_id: "{{ infos[0].roleID }}"
+    secret_id: "{{ infos[0].secretID }}"
+
+- name: Ensure destination directory exists
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+  - "/opt/vault-proxy"
+  - "/opt/vault-proxy/configs"
+  - "/opt/vault-proxy/configs/ca"
+  - "/opt/vault-proxy/configs/casbin"
+
+- name: Create init config
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+  loop:
+    - { src: "config.yaml", dst: "/opt/vault-proxy/configs/config.yaml" }
+    - { src: "permission_acl.csv", dst: "/opt/vault-proxy/configs/casbin/permission_acl.csv" }
+    - { src: "resource_acl.csv", dst: "/opt/vault-proxy/configs/casbin/resource_acl.csv" }
+    - { src: "docker-compose.yaml", dst: "/opt/vault-proxy/docker-compose.yaml" }
+    
+- name: Create init config
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+  loop:
+    - { src: "{{ output_folder_pki }}/{{ inventory_hostname }}.key", dst: "/opt/vault-proxy/configs/ca/localhost.key" }
+    - { src: "{{ output_folder_pki }}/{{ inventory_hostname }}.crt", dst: "/opt/vault-proxy/configs/ca/localhost.crt" }
+    - { src: "{{ output_folder_pki }}/ca.crt", dst: "/opt/vault-proxy/configs/ca/ca.crt" }
+
+- name: Start vault proxy
+  docker_compose:
+    project_src: /opt/vault-proxy
+    restarted: true
