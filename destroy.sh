@@ -15,7 +15,7 @@ if ! [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
       tail -f /dev/null
 fi
 
-docker exec -it $CONTAINER_NAME destroy-hosts | tee ${NAUTES_LOG_PATH}/destroy.log
-docker rm -f $CONTAINER_NAME                  | tee -a ${NAUTES_LOG_PATH}/destroy.log
-rm -rvf $NAUTES_PATH                          | tee -a ${NAUTES_LOG_PATH}/destroy.log
+docker exec $CONTAINER_NAME destroy-hosts | tee ${NAUTES_LOG_PATH}/destroy.log
+docker rm -f $CONTAINER_NAME              | tee -a ${NAUTES_LOG_PATH}/destroy.log
+rm -rvf $NAUTES_PATH                      | tee -a ${NAUTES_LOG_PATH}/destroy.log
 

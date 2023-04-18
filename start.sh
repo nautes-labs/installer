@@ -44,5 +44,5 @@ fi
 
 mkdir -p ${NAUTES_LOG_PATH}
 
-docker exec -it $CONTAINER_NAME install-all | tee ${NAUTES_LOG_PATH}/install.log
+docker exec $CONTAINER_NAME install-all | tee ${NAUTES_LOG_PATH}/install.log
 
