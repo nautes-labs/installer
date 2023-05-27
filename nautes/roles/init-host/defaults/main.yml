@@ -6,7 +6,7 @@ region_id: cn-hongkong
 zone_id: "{{ region_id }}-b"
 instance_type: ecs.c6.large
 
-gitlab_instance_type: "{{ instance_type }}"
+gitlab_instance_type: "ecs.g7.large"
 kubernetes_instance_type: "{{ instance_type }}"
 vault_instance_type: "{{ instance_type }}"
 harbor_instance_type: "{{ instance_type }}"
