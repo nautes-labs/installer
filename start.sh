@@ -5,9 +5,9 @@ set -e
 NAUTES_PATH="/opt/nautes"
 NAUTES_LOG_PATH="${NAUTES_PATH}/out/logs"
 
-if [ -z "$REVISION" ]
+if [ -z "$TENANT_REPO_TEMPLATE_REVISION" ]
 then
-    REVISION="main"
+    TENANT_REPO_TEMPLATE_REVISION="main"
 fi
 
 REPO_URL="https://github.com/nautes-labs/tenant-repo-template.git"
@@ -27,8 +27,11 @@ if [ -d "$TARGET_DIR/.git" ]; then
         exit 1
     fi
 else
-    echo "Repository not found, cloning to the /opt/ directory..."
-    git clone -b $REVISION "$REPO_URL" "$TARGET_DIR"
+    echo "Repository not found, cloning to the $TARGET_DIR directory..."
+    echo "========================="
+    echo "Using revision $TENANT_REPO_TEMPLATE_REVISION "
+    echo "========================="
+    git clone -b $TENANT_REPO_TEMPLATE_REVISION "$REPO_URL" "$TARGET_DIR"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to clone the repository."
         exit 1
