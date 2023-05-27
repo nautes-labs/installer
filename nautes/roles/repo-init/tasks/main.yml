@@ -61,6 +61,11 @@
     - "item.state == 'file'"
     - "'.git/' not in item.path"
 
+- name: Copy resource to tenant repo
+  copy:
+    src: nautes-runtime-trigger-templates.yaml
+    dest: "/tmp/tenant-repo/nautes/overlays/production/configmaps"
+ 
 - name: Add commit 
   shell: "cd /tmp/tenant-repo && git add . && git commit -m 'generate tenant repo'"
   ignore_errors: yes

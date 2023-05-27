@@ -1,6 +1,6 @@
 services:
   proxy:
-    image: "ghcr.io/nautes-labs/vault-proxy:0.1.0"
+    image: "{{ vault_proxy_image }}"
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "https://localhost:8000/health"]

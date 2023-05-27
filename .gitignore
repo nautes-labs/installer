@@ -1,2 +1,6 @@
 exclude.*
 vars.yaml
+ansible-vault
+bin/init-vault
+tenant-repo-template/
+

@@ -5,27 +5,30 @@ set -e
 NAUTES_PATH="/opt/nautes"
 NAUTES_LOG_PATH="${NAUTES_PATH}/out/logs"
 
+if [ -z "$REVISION" ]
+then
+    REVISION="main"
+fi
+
 REPO_URL="https://github.com/nautes-labs/tenant-repo-template.git"
 TARGET_DIR="${NAUTES_PATH}/management"
 
 CONTAINER_NAME=nautes-installer
-INSTALLER_VERSION=v0.2.0
+if [ -z "$INSTALLER_VERSION" ]
+then
+    INSTALLER_VERSION="latest"
+fi
 
 if [ -d "$TARGET_DIR/.git" ]; then
     echo "Repository already exists, updating to the latest code..."
-    git --git-dir="$TARGET_DIR/.git" --work-tree="$TARGET_DIR" fetch
+    git --git-dir="$TARGET_DIR/.git" --work-tree="$TARGET_DIR" pull
     if [ $? -ne 0 ]; then
         echo "Error: Failed to fetch updates from the remote repository."
         exit 1
     fi
-    git --git-dir="$TARGET_DIR/.git" --work-tree="$TARGET_DIR" merge origin/HEAD
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to merge updates from the remote repository."
-        exit 1
-    fi
 else
     echo "Repository not found, cloning to the /opt/ directory..."
-    git clone "$REPO_URL" "$TARGET_DIR"
+    git clone -b $REVISION "$REPO_URL" "$TARGET_DIR"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to clone the repository."
         exit 1

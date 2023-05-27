@@ -1,0 +1,4 @@
+docker_repository: ghcr.io/nautes-labs/
+image_version: latest
+vault_proxy_image: "{{ docker_repository }}vault-proxy:{{ image_version }}"
+
