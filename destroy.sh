@@ -4,8 +4,12 @@ set -e
 
 NAUTES_PATH="/opt/nautes"
 NAUTES_LOG_PATH="/tmp"
+
 CONTAINER_NAME=nautes-installer
-INSTALLER_VERSION=v0.2.0
+if [ -z "$INSTALLER_VERSION" ]
+then
+    INSTALLER_VERSION="latest"
+fi
 
 if ! [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
 	docker run -d --name $CONTAINER_NAME \

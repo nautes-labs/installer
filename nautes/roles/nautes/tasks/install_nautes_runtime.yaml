@@ -144,8 +144,8 @@
     status_code:
       - 200
       - 400
-  until: uri_output.status == 200 
-  retries: 120 
+  until: uri_output.status == 200 or uri_output.status == 400 
+  retries: 12 
   delay: 10
   register: uri_output
 
