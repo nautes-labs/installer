@@ -177,28 +177,36 @@ resource "alicloud_instance" "vault" {
 }
 
 locals {
-  gitlab_ips = [
-    for instance in alicloud_instance.gitlab :
-    "${instance.instance_name} ansible_host=${instance.public_ip}"
-  ]
+  ips = concat(
+    [for instance in alicloud_instance.gitlab :
+      {
+        name = "${instance.instance_name}"
+        host = "${instance.public_ip}"
+        type = "{{ host_type.git }}"
+      }
+    ],
 
-  kubernetes_ips = [
-    for instance in alicloud_instance.kubernetes :
-    "${instance.instance_name} ansible_host=${instance.public_ip}"
-  ]
+    [for instance in alicloud_instance.kubernetes :
+      {
+        name = "${instance.instance_name}"
+        host = "${instance.public_ip}"
+        type = "{{ host_type.kubernetes }}"
+      }
+    ],
 
-  kubernetes_hosts = [
-    for instance in alicloud_instance.kubernetes :
-    "${instance.instance_name}"
-  ]
+    [for instance in alicloud_instance.vault :
+      {
+        name = "${instance.instance_name}"
+        host = "${instance.public_ip}"
+        type = "{{ host_type.secret }}"
+      }
+    ],
 
-  vault_ips = [
-    for instance in alicloud_instance.vault :
-    "${instance.instance_name} ansible_host=${instance.public_ip}"
-  ]
+  )
 }
 
 resource "local_file" "ansible_hosts" {
-  content  = templatefile("ansible-host.tftpl", { gitlabs = local.gitlab_ips, kubernetes = local.kubernetes_ips, kubernetes_hosts = local.kubernetes_hosts, vaults = local.vault_ips })
-  filename = "/opt/out/hosts/ansible_hosts"
+  content  = templatefile("ansible-host-vars.tftpl", { ips = local.ips })
+  filename = "{{ ansible_host_source }}"
 }
+

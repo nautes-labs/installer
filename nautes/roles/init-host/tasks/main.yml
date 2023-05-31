@@ -16,9 +16,9 @@
     path: "{{ output_folder_hosts }}/id_rsa"
     size: 2048
  
-- name: Copy host template
+- name: Copy host info template
   copy:
-    src: ansible-host.tftpl
+    src: ansible-host-vars.tftpl
     dest: /tmp/terraform
 
 - name: Create file from template
@@ -30,5 +30,32 @@
   ansible.builtin.shell:
     chdir: /tmp/terraform
     cmd: terraform init && terraform apply -auto-approve
+
+- name: Load host info
+  ansible.builtin.include_vars:
+    file: "{{ ansible_host_source }}"
+
+- name: Grep git hosts from host info
+  set_fact: 
+    gits: "{{ gits | default([]) + [item] }}"
+  loop: "{{ terraform_hosts }}"
+  when: item.type == host_type.git
+
+- name: Grep kubernetes hosts from host info
+  set_fact: 
+    kubernetes: "{{ kubernetes | default([]) + [item] }}"
+  loop: "{{ terraform_hosts }}"
+  when: item.type == host_type.kubernetes
+
+- name: Grep secret hosts from host info
+  set_fact: 
+    secrets: "{{ secrets | default([]) + [item] }}"
+  loop: "{{ terraform_hosts }}"
+  when: item.type == host_type.secret
+
+- name: Create file from template
+  template:
+    src: ansible_hosts.j2
+    dest: "{{ output_folder_hosts }}/ansible_hosts"
 
 

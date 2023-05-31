@@ -1,0 +1,6 @@
+terraform_hosts:
+%{ for host in ips ~}
+  - name: ${ host.name }
+    host: ${ host.host }
+    type: ${ host.type }
+%{ endfor ~}
