@@ -121,7 +121,7 @@ resource "alicloud_instance" "gitlab" {
 }
 
 resource "alicloud_instance" "kubernetes" {
-  count = 3
+  count = {{ deploy.kubernetes.node_num }}
 
   instance_name = "k8s-${count.index}"
   image_id      = "ubuntu_22_04_x64_20G_alibase_20230208.vhd"
