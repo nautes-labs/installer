@@ -1,3 +1,4 @@
 #!/bin/sh
 
 ansible-playbook -e @/opt/vars.yaml /opt/nautes/terraform.yml
+ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/nautes/wait-for-host-ready.yaml

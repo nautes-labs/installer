@@ -1,6 +1,6 @@
 - hosts: gitlab
   roles:
-    - { role: geerlingguy.gitlab }
+    - { role: gitlab }
   pre_tasks:
   - name: Ensure destination directory exists
     file:
