@@ -13,32 +13,25 @@ Installer 项目为 Nautes 提供了自动化安装能力，支持基于公有�
 
 ## 执行安装
 
-1. 在安装机上克隆安装程序的项目：
-
-```bash
-git clone https://github.com/nautes-labs/installer.git
-```
-
-2. 根据 vars.yaml.sample 编写 vars.yaml，其中 access_key 和 secret_key 必须填写为阿里云账号的 AccessKey，其他配置可采用默认值。
-
+1. 准备好阿里云账号的AccessKey。
+2. 执行命令进行安装
 ```bash
 cat <<EOT >> vars.yaml
 access_key: < your alicloud access key >
 secret_key: < your alicloud secret key >
 EOT
+curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -
 ```
 
-3. 执行 `start.sh` 脚本开始安装：
+> 默认安装单节点的k3s，整个安装过程预计耗时15分钟，安装成功后，您可以在 /opt/nautes 目录下找到安装后的组件信息。如果安装失败，您可以通过 /opt/nautes/out/logs 目录下的日志排查问题。
 
-```bash
-sh start.sh
-```
+## 安装参数清单
 
-> 由于需要安装的组件较多，整个安装过程预计耗时40~50分钟，安装成功后，您可以在 /opt/nautes 目录下找到安装后的组件信息。如果安装失败，您可以通过 /opt/nautes/out/logs 目录下的日志排查问题。
+请参考项目下的 vars.yaml.sample 文件
 
 ## 查看安装结果
 
-/opt/nautes/management 是租户配置库的本地副本。
+/opt/nautes/flags 是安装进度的标识符，用于安装程序的继续执行。如果需要重新执行已经完成的步骤，需要在这里删除对应的标识符
 
 /opt/nautes/terraform 是 terraform 的状态文件，记录了安装程序在阿里云上申请的资源清单。
 
@@ -59,21 +52,16 @@ sh start.sh
 
 ## 销毁环境
 
-> 请确保已成功执行安装，未删除安装机上的 /opt/nautes 目录，且 nautes-installer 容器在运行中。
+> 请确保未删除安装机上的 /opt/nautes 目录
 >
 > 销毁程序将删除所有从云服务中申请的资源，暂不支持单独对组件执行卸载。
 
-1. 在安装机上克隆安装程序的项目：
-
 ```bash
-git clone https://github.com/nautes-labs/installer.git
-```
-
-2. 修改项目根目录下的 vars.yaml 文件，填写 access_key 和 secret_key。
-3. 执行 `destroy.sh` 脚本开始销毁环境：
-
-```bash
-sh destroy.sh
+cat <<EOT >> vars.yaml
+access_key: < your alicloud access key >
+secret_key: < your alicloud secret key >
+EOT
+curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -s destroy
 ```
 
 ## 阿里云费用说明
@@ -100,3 +88,40 @@ alicloud:
 - 抢占式实例：24￥/天
 
 > 实际产生的费用会受到市场价格波动的影响，以上预估值仅供参考
+
+## 其他
+### 使用指定版本的安装程序镜像
+安装开始前，设置环境变量 INSTALLER_VERSION
+```bash
+export INSTALLER_VERSION=v0.0.0
+```
+
+### 使用指定版本或者从指定路径拉取租户配置库模板
+安装开始前，在vars.yaml文件中添加以下配置, 修改 repos.tenant_template 下的值
+```yaml
+repos:
+  # Template for nautes tenant repo
+  tenant_template:
+    url: https://github.com/nautes-labs/tenant-repo-template.git
+    version: main
+  # Nautes cluster template repo
+  cluster_template:
+    url: https://github.com/nautes-labs/cluster-templates.git
+  # Ansible role information for installing vault
+  role_vault:
+    url: https://github.com/ansible-community/ansible-vault.git
+    version: master
+  # Ansible role information for installing gitlab
+  role_gitlab:
+    url: https://github.com/geerlingguy/ansible-role-gitlab.git
+    version: master
+```
+
+### 安装标准k8s
+安装开始前，在vars.yaml文件中添加以下配置
+```yaml
+deploy:
+  kubernetes:
+    type: k8s
+    node_num: 3
+```

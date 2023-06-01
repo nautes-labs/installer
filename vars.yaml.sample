@@ -11,7 +11,7 @@ zone_id: "cn-hongkong-b"
 
 # use "Preemptible Instance" to create instance
 alicloud:
-  save_money: true 
+  save_money: true
 
 # the nautes tenant name u want
 tenant_name: "nautes"
@@ -49,8 +49,8 @@ repos:
   # Template for nautes tenant repo
   tenant_template:
     url: https://github.com/nautes-labs/tenant-repo-template.git
-    version: add-template-index
-  # nautes runtime template source
+    version: main
+  # Nautes cluster template repo
   cluster_template:
     url: https://github.com/nautes-labs/cluster-templates.git
   # Ansible role information for installing vault
