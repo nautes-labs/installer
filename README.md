@@ -52,7 +52,7 @@ curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh |
 
 ## 销毁环境
 
-> 请确保已成功执行安装，未删除安装机上的 /opt/nautes 目录，且 nautes-installer 容器在运行中。
+> 请确保未删除安装机上的 /opt/nautes 目录
 >
 > 销毁程序将删除所有从云服务中申请的资源，暂不支持单独对组件执行卸载。
 
