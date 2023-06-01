@@ -31,8 +31,6 @@ tenant_name: "nautes"
 #webhook_image: ghcr.io/nautes-labs/webhook:latest
 #vault_proxy_image: ghcr.io/nautes-labs/vault-proxy:latest
 
-# nautes runtime template source
-runtime_template_source: ""
 
 # the http port of gitlab
 gitlab_port: 31443
@@ -52,6 +50,9 @@ repos:
   tenant_template:
     url: https://github.com/nautes-labs/tenant-repo-template.git
     version: add-template-index
+  # nautes runtime template source
+  cluster_template:
+    url: https://github.com/nautes-labs/cluster-templates.git
   # Ansible role information for installing vault
   role_vault:
     url: https://github.com/ansible-community/ansible-vault.git
