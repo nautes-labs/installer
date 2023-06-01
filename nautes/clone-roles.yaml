@@ -1,0 +1,15 @@
+- hosts: localhost
+  tasks:
+  - ansible.builtin.git:
+      repo: "{{ repos.tenant_template.url }}"
+      dest: /opt/management
+      version: "{{ repos.tenant_template.version }}"
+  - ansible.builtin.git:
+      repo: "{{ repos.role_vault.url }}"
+      dest: /opt/nautes/roles/ansible-vault
+      version: "{{ repos.role_vault.version }}"
+  - ansible.builtin.git:
+      repo: "{{ repos.role_gitlab.url }}"
+      dest: /opt/nautes/roles/gitlab
+      version: "{{ repos.role_gitlab.version }}"
+ 

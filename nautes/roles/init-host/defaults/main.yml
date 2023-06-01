@@ -20,3 +20,8 @@ host_type:
   git: "git"
   kubernetes: "kubernetes"
   secret: "secret"
+
+deploy:
+  kubernetes:
+    type: k3s
+    node_num: 1

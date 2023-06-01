@@ -1,7 +1,9 @@
 #!/bin/sh
 
-set -x
 KUBERNETES_TYPE=$(yq '.deploy.kubernetes.type' /opt/vars.yaml)
+if [ "$KUBERNETES_TYPE" = null ]; then
+    KUBERNETES_TYPE="k3s"
+fi
 
 if [ $KUBERNETES_TYPE = "k8s" ]; then
   ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/kubespray/cluster.yml

@@ -17,8 +17,9 @@ alicloud:
 tenant_name: "nautes"
 
 # nautes images source
-# default image source and version
 #docker_repository: ghcr.io/nautes-labs/
+
+# default image source and version
 #image_version: latest
 
 # specify which image to use
@@ -38,3 +39,24 @@ gitlab_port: 31443
 
 # the nodeport of tenant cluster
 vcluster_api_port: 32000
+
+deploy:
+  kubernetes:
+    # Specify which k8s implementation to use, with options of "k3s" and "k8s".
+    type: k3s
+    # Specify the number of nodes for k8s. When using k3s, only one node will be used.
+    node_num: 1
+
+repos:
+  # Template for nautes tenant repo
+  tenant_template:
+    url: https://github.com/nautes-labs/tenant-repo-template.git
+    version: add-template-index
+  # Ansible role information for installing vault
+  role_vault:
+    url: https://github.com/ansible-community/ansible-vault.git
+    version: master
+  # Ansible role information for installing gitlab
+  role_gitlab:
+    url: https://github.com/geerlingguy/ansible-role-gitlab.git
+    version: master

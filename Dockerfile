@@ -4,7 +4,7 @@ ENV PATH=$PATH:/opt/bin
 COPY bin /opt/bin
 
 RUN set -x \
- && apk add --no-cache git zip terraform vim openssh py3-pip gcc libc-dev python3-dev openssl-dev helm tree curl tar bash jq yq \
+ && apk add --no-cache git zip terraform vim openssh py3-pip gcc libc-dev python3-dev openssl-dev helm tree curl tar bash jq yq rsync \
  && echo "set mouse=" > /root/.vimrc \
  && echo -e '\
 Host *\n\

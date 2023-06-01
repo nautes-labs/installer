@@ -34,6 +34,10 @@
     oauth_clientID: "{{ lookup('file', '{{ output_folder_gitrepo }}/client_id' ) }}"
     oauth_client_secret: "{{ lookup('file', '{{ output_folder_gitrepo }}/client_sercret' ) }}"
     dex_client_secret: "{{ lookup('file', '{{ output_folder_k8s }}/dex_client_secret' ) }}"
+    
+- name: Load template file list
+  ansible.builtin.include_vars:
+    file: /opt/management/list-to-be-generated.yaml
 
 - name: Clone a repository
   git:
@@ -41,31 +45,21 @@
     dest: /tmp/tenant-repo
   ignore_errors: yes
 
-- name: Create directories
-  file:
-    path: "/tmp/tenant-repo/{{ item.path }}"
-    state: directory
-    mode: '{{ item.mode }}'
-  with_community.general.filetree: "{{ template_path }}"
-  when: 
-    - "item.state == 'directory'"
-    - "'.git/' not in item.path"
+- name: Copy directory to remote host excluding a subdirectory
+  synchronize:
+    src: /opt/management/
+    dest: /tmp/tenant-repo
+    rsync_opts:
+      - "--exclude=.git"
+      - "--exclude=list-to-be-generated.yaml"
 
 - name: Generate tenant repo
   template:
-    src: "{{ item.src }}"
-    dest: "/tmp/tenant-repo/{{ item.path }}"
-    mode: '{{ item.mode }}'
-  with_community.general.filetree: "{{ template_path }}"
-  when: 
-    - "item.state == 'file'"
-    - "'.git/' not in item.path"
+    src: "/opt/management/{{ item }}"
+    dest: "/tmp/tenant-repo/{{ item }}"
+    mode: '0644'
+  loop: "{{ templates }}"
 
-- name: Copy resource to tenant repo
-  copy:
-    src: nautes-runtime-trigger-templates.yaml
-    dest: "/tmp/tenant-repo/nautes/overlays/production/configmaps"
- 
 - name: Add commit 
   shell: "cd /tmp/tenant-repo && git add . && git commit -m 'generate tenant repo'"
   ignore_errors: yes

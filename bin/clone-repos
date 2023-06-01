@@ -1,0 +1,3 @@
+#!/bin/sh
+
+ansible-playbook -e @/opt/vars.yaml /opt/nautes/clone-roles.yaml
