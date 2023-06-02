@@ -43,13 +43,15 @@ function destroy() {
 }
 
 function install() {
+    set -e
+    set -o pipefail
     local LOG_FILE="${NAUTES_LOG_PATH}/install.log"
     rm $LOG_FILE && touch $LOG_FILE
     
     local INSTALLATION_PROGRESS_PATH="${NAUTES_PATH}/flags"
     mkdir -p ${INSTALLATION_PROGRESS_PATH}
 
-    docker exec -i $CONTAINER_NAME clone-repos
+    docker exec -i $CONTAINER_NAME clone-repos | tee -a $LOG_FILE 
 
     local FLAG_CREATION_COMPLETED_HOST="${INSTALLATION_PROGRESS_PATH}/create_host"
     if ! [ -e $FLAG_CREATION_COMPLETED_HOST ]; then
