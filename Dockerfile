@@ -17,10 +17,10 @@ Host *\n\
  && pip install -r /opt/kubespray/requirements.txt 
 
 RUN set -x \
- && mkdir /etc/ansible
+ && mkdir /etc/ansible \
  && echo -e '\
-[defaults]
-callbacks_enabled = profile_tasks
+[defaults]\n\
+callbacks_enabled = profile_tasks\n'\
 >> /etc/ansible/ansible.cfg \
  && curl -o /usr/local/bin/kubectl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \
  && chmod +x /usr/local/bin/kubectl \
