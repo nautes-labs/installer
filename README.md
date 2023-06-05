@@ -13,27 +13,36 @@ Installer 项目为 Nautes 提供了自动化安装能力，支持基于公有�
 
 ## 执行安装
 
-1. 准备好阿里云账号的AccessKey。
-2. 执行命令进行安装
+1. 创建安装程序的配置文件。
 ```bash
 cat <<EOT >> vars.yaml
 access_key: < your alicloud access key >
 secret_key: < your alicloud secret key >
 EOT
-curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -
 ```
 
-> 默认安装单节点的k3s，整个安装过程预计耗时15分钟，安装成功后，您可以在 /opt/nautes 目录下找到安装后的组件信息。如果安装失败，您可以通过 /opt/nautes/out/logs 目录下的日志排查问题。
+2. 执行以下命令进行默认安装。
+```bash
+curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -
+```
+or
+```bash
+curl -OL https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh
+chmod +x installer.sh
+./installer.sh
+```
+
+> 默认安装单节点的 k3s ，整个安装过程预计耗时15分钟。安装成功后，您可以在 /opt/nautes 目录下找到安装后的组件信息。如果安装失败，您可以通过 /opt/nautes/out/logs 目录下的日志排查问题。
 
 ## 安装参数清单
 
-请参考项目下的 vars.yaml.sample 文件
+请参考 [vars.yaml.sample](https://github.com/nautes-labs/installer/blob/main/vars.yaml.sample)。
 
 ## 查看安装结果
 
-/opt/nautes/flags 是安装进度的标识符，用于安装程序的继续执行。如果需要重新执行已经完成的步骤，需要在这里删除对应的标识符
+/opt/nautes/flags 中存储了安装进度的标识文件。用于安装程序的跳过已经完成的安装步骤。
 
-/opt/nautes/terraform 是 terraform 的状态文件，记录了安装程序在阿里云上申请的资源清单。
+/opt/nautes/terraform 中存储了 terraform 的状态文件，记录了安装程序在阿里云上申请的资源清单。
 
 /opt/nautes/out 中存储了已安装组件的相关信息：
 
@@ -52,27 +61,38 @@ curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh |
 
 ## 销毁环境
 
-> 请确保未删除安装机上的 /opt/nautes 目录
+> 请确保未删除安装机上的 /opt/nautes 目录。执行销毁命令的目录下有安装的配置文件 vars.yaml。
 >
 > 销毁程序将删除所有从云服务中申请的资源，暂不支持单独对组件执行卸载。
 
 ```bash
-cat <<EOT >> vars.yaml
-access_key: < your alicloud access key >
-secret_key: < your alicloud secret key >
-EOT
 curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -s destroy
+```
+or
+```bash
+./installer.sh destroy
 ```
 
 ## 阿里云费用说明
 
 安装程序所申请的云服务器的默认规格如下：
 
+
 - 区域：中国香港-可用区B
 - 镜像：Ubuntu 22.04 64位
 - 实例规格：ecs.c6.large(2C4G)
 - 系统盘：ESSD云盘 PL0 40G
 - 网络：实例公网IP
+- 数目： 2
+- 用途： k3s, vault
+---
+- 区域：中国香港-可用区B
+- 镜像：Ubuntu 22.04 64位
+- 实例规格：ecs.g5.large(2C8G)
+- 系统盘：ESSD云盘 PL0 40G
+- 网络：实例公网IP
+- 数目： 1
+- 用途： gitlab
 
 安装程序默认使用[抢占式实例模式](https://help.aliyun.com/document_detail/52088.html?spm=5176.ecsbuyv3.0.0.2a2736756P0dh1)创建云服务器，该模式存在实例被自动释放的风险。如果您希望体验更稳定的环境，请在 vars.yaml 增加以下配置，让安装程序切换至[按量付费模式](https://help.aliyun.com/document_detail/40653.html?spm=5176.ecsbuyv3.0.0.2a2736756P0dh1)申请资源。
 
@@ -83,45 +103,29 @@ alicloud:
 
 两种付费模式的费用预估如下（不包含流量费）：
 
-- 按量付费：88.32￥/天
+- 按量付费：56.112￥/天
 
-- 抢占式实例：24￥/天
+- 抢占式实例：13.5￥/天
 
-> 实际产生的费用会受到市场价格波动的影响，以上预估值仅供参考
+> 实际产生的费用会受到市场价格波动的影响，以上预估值仅供参考。
 
-## 其他
+## 自定义安装
 ### 使用指定版本的安装程序镜像
-安装开始前，设置环境变量 INSTALLER_VERSION
+安装开始前，设置环境变量 INSTALLER_VERSION。
 ```bash
 export INSTALLER_VERSION=v0.0.0
 ```
 
-### 使用指定版本或者从指定路径拉取租户配置库模板
-安装开始前，在vars.yaml文件中添加以下配置, 修改 repos.tenant_template 下的值
+### 使用指定仓库
+安装开始前，在vars.yaml文件中添加以下配置。
 ```yaml
-repos:
-  # Template for nautes tenant repo
-  tenant_template:
-    url: https://github.com/nautes-labs/tenant-repo-template.git
-    version: main
-  # Nautes cluster template repo
-  cluster_template:
-    url: https://github.com/nautes-labs/cluster-templates.git
-  # Ansible role information for installing vault
-  role_vault:
-    url: https://github.com/ansible-community/ansible-vault.git
-    version: master
-  # Ansible role information for installing gitlab
-  role_gitlab:
-    url: https://github.com/geerlingguy/ansible-role-gitlab.git
-    version: master
+repos.tenant_template.url: https://github.com/nautes-labs/tenant-repo-template.git
+repos.tenant_template.version: main
 ```
 
-### 安装标准k8s
-安装开始前，在vars.yaml文件中添加以下配置
+### 使用标准 K8S
+安装开始前，在vars.yaml文件中添加以下配置。
 ```yaml
-deploy:
-  kubernetes:
-    type: k8s
-    node_num: 3
+deploy.kubernetes.type: k8s
+deploy.kubernetes.node_num: 3
 ```
