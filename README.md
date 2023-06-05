@@ -40,7 +40,7 @@ chmod +x installer.sh
 
 ## 查看安装结果
 
-/opt/nautes/flags 中存储了安装进度的标识文件。用于安装程序的跳过已经完成的安装步骤。
+/opt/nautes/flags 中存储了安装进度的标识文件。安装程序会根据标识文件跳过已完成的安装步骤。
 
 /opt/nautes/terraform 中存储了 terraform 的状态文件，记录了安装程序在阿里云上申请的资源清单。
 
