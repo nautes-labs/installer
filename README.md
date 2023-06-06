@@ -1,5 +1,9 @@
 # Installer
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![ansible](https://img.shields.io/badge/ansible-v2.12.5-brightgreen)](https://go.dev/doc/install)
+[![version](https://img.shields.io/badge/version-v0.3.1-green)](https://nautes.io)
+
 Installer 项目为 Nautes 提供了自动化安装能力，支持基于公有云、私有云、主机、及 Kubernets 集群进行安装，本文档以阿里云为例描述了在公有云安装 Nautes 的过程。
 
 ## 准备环境
@@ -13,7 +17,8 @@ Installer 项目为 Nautes 提供了自动化安装能力，支持基于公有�
 
 ## 执行安装
 
-1. 创建安装程序的配置文件。
+创建安装程序的配置文件。
+
 ```bash
 cat <<EOT >> vars.yaml
 access_key: < your alicloud access key >
@@ -21,22 +26,21 @@ secret_key: < your alicloud secret key >
 EOT
 ```
 
-2. 执行以下命令进行默认安装。
+执行以下命令进行默认安装。
+
 ```bash
 curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -
 ```
-or
+
+或者
+
 ```bash
 curl -OL https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh
 chmod +x installer.sh
 ./installer.sh
 ```
 
-> 默认安装单节点的 k3s ，整个安装过程预计耗时15分钟。安装成功后，您可以在 /opt/nautes 目录下找到安装后的组件信息。如果安装失败，您可以通过 /opt/nautes/out/logs 目录下的日志排查问题。
-
-## 安装参数清单
-
-请参考 [vars.yaml.sample](https://github.com/nautes-labs/installer/blob/main/vars.yaml.sample)。
+> 默认安装单节点的 K3s ，根据安装机公网带宽大小，整个安装过程预计耗时15~25分钟。安装成功后，您可以在 /opt/nautes 目录下找到安装后的组件信息。如果安装失败，您可以通过 /opt/nautes/out/logs 目录下的日志排查问题。
 
 ## 查看安装结果
 
@@ -61,14 +65,16 @@ chmod +x installer.sh
 
 ## 销毁环境
 
-> 请确保未删除安装机上的 /opt/nautes 目录。执行销毁命令的目录下有安装的配置文件 vars.yaml。
+> 请确保未删除安装机上的 /opt/nautes 目录。执行销毁命令的目录下有安装程序的配置文件 vars.yaml。
 >
 > 销毁程序将删除所有从云服务中申请的资源，暂不支持单独对组件执行卸载。
 
 ```bash
 curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -s destroy
 ```
-or
+
+或者
+
 ```bash
 ./installer.sh destroy
 ```
@@ -77,22 +83,23 @@ or
 
 安装程序所申请的云服务器的默认规格如下：
 
-
 - 区域：中国香港-可用区B
 - 镜像：Ubuntu 22.04 64位
 - 实例规格：ecs.c6.large(2C4G)
 - 系统盘：ESSD云盘 PL0 40G
 - 网络：实例公网IP
 - 数目： 2
-- 用途： k3s, vault
+- 用途：K3s、Vault
+
 ---
+
 - 区域：中国香港-可用区B
 - 镜像：Ubuntu 22.04 64位
 - 实例规格：ecs.g5.large(2C8G)
 - 系统盘：ESSD云盘 PL0 40G
 - 网络：实例公网IP
 - 数目： 1
-- 用途： gitlab
+- 用途： GitLab
 
 安装程序默认使用[抢占式实例模式](https://help.aliyun.com/document_detail/52088.html?spm=5176.ecsbuyv3.0.0.2a2736756P0dh1)创建云服务器，该模式存在实例被自动释放的风险。如果您希望体验更稳定的环境，请在 vars.yaml 增加以下配置，让安装程序切换至[按量付费模式](https://help.aliyun.com/document_detail/40653.html?spm=5176.ecsbuyv3.0.0.2a2736756P0dh1)申请资源。
 
@@ -110,22 +117,33 @@ alicloud:
 > 实际产生的费用会受到市场价格波动的影响，以上预估值仅供参考。
 
 ## 自定义安装
+
 ### 使用指定版本的安装程序镜像
+
 安装开始前，设置环境变量 INSTALLER_VERSION。
+
 ```bash
-export INSTALLER_VERSION=v0.0.0
+export INSTALLER_VERSION=vX.Y.Z
 ```
 
-### 使用指定仓库
-安装开始前，在vars.yaml文件中添加以下配置。
+### 使用指定租户配置库模板
+
+安装开始前，在 vars.yaml 文件中添加以下配置。
+
 ```yaml
 repos.tenant_template.url: https://github.com/nautes-labs/tenant-repo-template.git
 repos.tenant_template.version: main
 ```
 
-### 使用标准 K8S
-安装开始前，在vars.yaml文件中添加以下配置。
+### 使用标准 K8s
+
+安装开始前，在 vars.yaml 文件中添加以下配置。
+
 ```yaml
 deploy.kubernetes.type: k8s
 deploy.kubernetes.node_num: 3
 ```
+
+### 完整参数清单
+
+请参考 [vars.yaml.sample](https://github.com/nautes-labs/installer/blob/main/vars.yaml.sample)。
