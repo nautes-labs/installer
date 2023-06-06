@@ -104,8 +104,7 @@ curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh |
 安装程序默认使用[抢占式实例模式](https://help.aliyun.com/document_detail/52088.html?spm=5176.ecsbuyv3.0.0.2a2736756P0dh1)创建云服务器，该模式存在实例被自动释放的风险。如果您希望体验更稳定的环境，请在 vars.yaml 增加以下配置，让安装程序切换至[按量付费模式](https://help.aliyun.com/document_detail/40653.html?spm=5176.ecsbuyv3.0.0.2a2736756P0dh1)申请资源。
 
 ```yaml
-alicloud:
-  save_money: false
+alicloud.save_money: false
 ```
 
 两种付费模式的费用预估如下（不包含流量费）：
