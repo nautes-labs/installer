@@ -25,6 +25,7 @@ ${EXTRA_MOUNT}"
     fi
 
     if ! [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
+        docker pull ghcr.io/nautes-labs/installer:${INSTALLER_VERSION} 
         docker run -d --name ${CONTAINER_NAME} ${EXTRA_MOUNT}\
          -v ${NAUTES_PATH}/out:/opt/out \
          -v ${NAUTES_PATH}/terraform:/tmp/terraform \
