@@ -1,0 +1,8 @@
+- hosts: k8s-0
+  tasks:
+  - name: Install k3s
+    shell: |
+      curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.21.14+k3s1 INSTALL_K3S_EXEC="--tls-san {{ kube_entrypoint_ip }}" sh -s - server --disable servicelb --disable traefik --disable metrics-server
+      mkdir -p ${HOME}/.kube
+      /bin/cp -f /etc/rancher/k3s/k3s.yaml ${HOME}/.kube/k3s-config
+      /bin/cp -f /etc/rancher/k3s/k3s.yaml ${HOME}/.kube/config

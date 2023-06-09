@@ -1,4 +1,15 @@
 #!/bin/sh
 
-ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/nautes/wait-for-host-ready.yaml
-ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/kubespray/cluster.yml
+KUBERNETES_TYPE=$(yq '.deploy.kubernetes.type' /opt/vars.yaml)
+if [ "$KUBERNETES_TYPE" = null ]; then
+    KUBERNETES_TYPE="k3s"
+fi
+
+if [ $KUBERNETES_TYPE = "k8s" ]; then
+  ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/kubespray/cluster.yml
+elif [ $KUBERNETES_TYPE = "k3s"  ]; then
+  ansible-playbook -i /opt/out/hosts/ansible_hosts -e @/opt/vars.yaml /opt/nautes/k3s.yaml
+else
+  echo "Error: Unknow kubernetes type"
+  exit 1
+fi

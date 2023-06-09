@@ -7,5 +7,3 @@ base_operator_image: "{{ docker_repository }}base-operator:{{ image_version }}"
 cluster_operator_image: "{{ docker_repository }}cluster-operator:{{ image_version }}"
 runtime_operator_image: "{{ docker_repository }}runtime-operator:{{ image_version }}"
 webhook_image: "{{ docker_repository }}webhook:{{ image_version }}"
-
-runtime_template_source: ""

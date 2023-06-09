@@ -14,3 +14,14 @@ harbor_instance_type: "{{ instance_type }}"
 alicloud:
   save_money: true 
 
+ansible_host_source: "/tmp/ansible-host-vars"
+
+host_type:
+  git: "git"
+  kubernetes: "kubernetes"
+  secret: "secret"
+
+deploy:
+  kubernetes:
+    type: k3s
+    node_num: 1

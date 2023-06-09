@@ -1,0 +1,34 @@
+[gitlab]
+{% for host in gits %}
+{{ host.name }} ansible_host={{ host.host }}
+{% endfor %}
+
+[kube_control_plane]
+{% for host in kubernetes %}
+{{ host.name }} ansible_host={{ host.host }}
+{% endfor %}
+
+[kube_node]
+{% for host in kubernetes %}
+{{ host.name }}
+{% endfor %}
+
+[etcd]
+{% for host in kubernetes %}
+{{ host.name }}
+{% endfor %}
+
+[k8s_cluster:children]
+kube_control_plane
+kube_node
+
+[vault]
+{% for host in secrets %}
+{{ host.name }} ansible_host={{ host.host }}
+{% endfor %}
+
+[all:vars]
+no_log=true
+local_path_provisioner_enabled=true
+
+

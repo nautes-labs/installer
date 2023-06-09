@@ -1,6 +1,10 @@
 exclude.*
-vars.yaml
-ansible-vault
-bin/init-vault
-tenant-repo-template/
 
+vars.yaml
+
+bin/init-vault
+
+**/tenant-repo-template
+**/ansible-role-k3s
+**/ansible-vault
+**/gitlab
