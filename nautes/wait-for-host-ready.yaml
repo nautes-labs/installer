@@ -11,3 +11,14 @@
         sleep: 10
       connection: local
 
+    - name: Check whether to use apt management pack
+      package_facts:
+        manager: apt
+    
+    - name: If apt exists, execute apt upgrade
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400 
+      when: '"apt" in ansible_facts.packages'
+

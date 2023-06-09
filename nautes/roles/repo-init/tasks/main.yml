@@ -37,7 +37,7 @@
     
 - name: Load template file list
   ansible.builtin.include_vars:
-    file: /opt/management/list-to-be-generated.yaml
+    file: /opt/management/index.yaml
 
 - name: Clone a repository
   git:
@@ -51,7 +51,7 @@
     dest: /tmp/tenant-repo
     rsync_opts:
       - "--exclude=.git"
-      - "--exclude=list-to-be-generated.yaml"
+      - "--exclude=index.yaml"
 
 - name: Generate tenant repo
   template:
