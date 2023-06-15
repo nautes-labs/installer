@@ -82,5 +82,5 @@
 
   - name: Change file permissions
     file:
-      path: "{{ output_folder_gitrepo }}/tenante_repo_private.key"
+      path: "{{ output_folder_gitrepo }}/tenant_repo_private.key"
       mode: '0600'

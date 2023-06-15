@@ -1,9 +1,11 @@
 - name: Load root token
   ansible.builtin.include_vars:
-    file: "{{ output_folder_secrepo }}/vault-proxy.yml"
+    file: "{{ item }}" 
+  with_items:
+  - "{{ output_folder_secrepo }}/vault-proxy.yml"
+  - "{{ output_folder_gitrepo }}/infos.yaml"
 
 - set_fact:
-    tenant_repo_id: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_id' ) }}"
     role_id: "{{ infos[0].roleID }}"
     secret_id: "{{ infos[0].secretID }}"
 

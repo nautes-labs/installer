@@ -3,6 +3,7 @@ import gitlab
 import paramiko
 import os
 import requests
+import yaml
 from io import StringIO
 
 requests.packages.urllib3.disable_warnings()
@@ -22,7 +23,7 @@ def generate():
 @click.option('--group_name', prompt='Please input group name')
 @click.option('--project_name', prompt='Please input project name')
 @click.option('--app_call_back_url', prompt='Please input call back url for app')
-@click.option('--output_base', default="/opt/out/gitlab", help='The base folder to write init info')
+@click.option('--output_base', default="/opt/out/git", help='The base folder to write init info')
 def main(gitlab_url, token, group_name, project_name, app_call_back_url, output_base):
     gl = gitlab.Gitlab(gitlab_url, private_token=token, ssl_verify=False)
 
@@ -89,17 +90,18 @@ def main(gitlab_url, token, group_name, project_name, app_call_back_url, output_
             "client_id" : client_id,
             "client_sercret": client_secret,
             "access_token": access_token.token,
-            "tenante_repo_private.key": private_key,
-            "tenante_repo_id": str(project_id),
-            "tenante_repo_ssh_addr": ssh_addr
+            "tenant_repo_id": str(project_id),
+            "tenant_repo_ssh_addr": ssh_addr
         }
 
-        for k,v in outputs.items():
-            filePath = os.path.join(output_base, k)
-            if v == None:
-                continue
-            with open(filePath, "w") as f:
-                f.write(v)
+        filePath = os.path.join(output_base, "infos.yaml")
+        with open(filePath, 'w') as f:
+            yaml.dump(outputs, f)
+
+        sshKeyPath = os.path.join(output_base, "tenant_repo_private.key")
+        with open(sshKeyPath, "w") as f:
+            f.write(private_key)
+
 
 if __name__ == '__main__':
     main()

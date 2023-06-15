@@ -27,7 +27,7 @@ argocd_dashboard_domain: "argocd.{{ kube_entrypoint_ip }}.nip.io"
 
 output_folder: /opt/out
 output_folder_pki: "{{ output_folder }}/pki"
-output_folder_gitrepo: "{{ output_folder }}/gitlab"
+output_folder_gitrepo: "{{ output_folder }}/git"
 output_folder_hosts: "{{ output_folder }}/hosts"
 output_folder_k8s: "{{ output_folder }}/kubernetes"
 output_folder_secrepo: "{{ output_folder }}/vault"
@@ -45,3 +45,16 @@ repos:
   role_gitlab:
     url: https://github.com/geerlingguy/ansible-role-gitlab.git
     version: master
+
+flag:
+  installation:
+    path: "/tmp/flags"
+    name:
+      host: "hosts"
+      kubernetes: "k8s"
+      init: "init"
+      git: "gitrepo"
+      tenant_repo: "tenant_repo"
+      nautes: "nautes"
+      secret: "secret_store"
+ 

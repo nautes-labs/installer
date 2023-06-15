@@ -109,9 +109,6 @@
     namespace: "{{ tenant_name }}"
   register: vcluster_kubeconfig
 
-- debug:
-    var: vcluster_kubeconfig
-
 - name: Create kubernetes config path
   file:
     path: "~/.kube"

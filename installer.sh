@@ -33,6 +33,7 @@ ${EXTRA_MOUNT}"
         docker run -d --name ${CONTAINER_NAME} ${EXTRA_MOUNT}\
          -v ${NAUTES_PATH}/out:/opt/out \
          -v ${NAUTES_PATH}/terraform:/tmp/terraform \
+         -v ${NAUTES_PATH}/flags:/tmp/flags \
          -v `pwd`/vars.yaml:/opt/vars.yaml \
          ghcr.io/nautes-labs/installer:${INSTALLER_VERSION} \
            tail -f /dev/null

@@ -1,8 +1,11 @@
 - set_fact:
-    tenant_repo_id: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_id' ) }}"
+    git_info: "{{ lookup('file', '{{ output_folder_gitrepo }}/infos.yaml' )|from_yaml }}"
+
+- set_fact:
     ca_cert: "{{ lookup('file', '{{ output_folder_pki }}/ca.crt' ) }}"
-    tenant_repo_deploykey: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_private.key' ) }}"
-    root_access_token: "{{ lookup('file', '{{ output_folder_gitrepo }}/access_token' ) }}"
+    tenant_repo_id: "{{ git_info.tenant_repo_id }}"
+    tenant_repo_deploykey: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenant_repo_private.key' ) }}"
+    root_access_token: "{{ git_info.access_token }}"
 
 - name: Wait until HTTP status is 200
   uri:

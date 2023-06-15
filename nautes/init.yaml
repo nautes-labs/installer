@@ -126,4 +126,3 @@
       ownca_path: "{{ output_folder_pki }}/ca.crt"
       ownca_privatekey_path: "{{ output_folder_pki }}/ca.pem"
       provider: ownca
-
