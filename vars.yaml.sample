@@ -2,8 +2,13 @@
 access_key:
 secret_key:
 
-# The instance type of cloud server.
-instance_type: ecs.c6.large
+# You can customize the cloud server instance type through the following configuration.
+# The cloud server instance type for GitLab
+# gitlab_instance_type: ecs.g5.large
+# The cloud server instance type for Kubernetes
+# kubernetes_instance_type: ecs.c6.large
+# The cloud server instance type for Vault
+# vault_instance_type: ecs.c6.large
 
 # Region ID of the cloud server.
 region_id: cn-hongkong
