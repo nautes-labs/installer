@@ -35,9 +35,6 @@ tenant_name: "nautes"
 # webhook_image: ghcr.io/nautes-labs/webhook:latest
 # vault_proxy_image: ghcr.io/nautes-labs/vault-proxy:latest
 
-# The HTTPS port of GitLab.
-gitlab_port: 31443
-
 # The NodePort of tenant management cluster.
 vcluster_api_port: 32000
 
@@ -58,5 +55,6 @@ repos.role_vault.url: https://github.com/ansible-community/ansible-vault.git
 repos.role_vault.version: master
 
 # Repository address and branch for ansible role used to install Gitlab.
+# For optional gitLab installation configuration items, please refer to the project https://github.com/geerlingguy/ansible-role-gitlab.
 repos.role_gitlab.url: https://github.com/geerlingguy/ansible-role-gitlab.git
 repos.role_gitlab.version: master

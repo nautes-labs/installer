@@ -1,5 +1,7 @@
 gitlab_domain: "{{ gitlab_ip }}"
 
+gitlab_version: "15.10.8-ce.0"
+
 gitlab_create_self_signed_cert: false
 gitlab_ssl_certificate: "/etc/gitlab/ssl/{{ inventory_hostname }}.crt"
 gitlab_ssl_certificate_key: "/etc/gitlab/ssl/{{ inventory_hostname }}.key"

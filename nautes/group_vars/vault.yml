@@ -1,3 +1,5 @@
+vault_version: 1.10.4
+
 vault_address: "0.0.0.0"
 vault_tls_disable: '0'
 vault_tls_certs_path: '/etc/vault.d/pki'
