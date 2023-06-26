@@ -1,3 +1,5 @@
 #!/bin/sh
 
+rm -f /tmp/flags/*
 terraform -chdir=/tmp/terraform/ destroy --auto-approve
+rm -rf /opt/out/*

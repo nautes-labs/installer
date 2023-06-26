@@ -58,3 +58,13 @@ flag:
       nautes: "nautes"
       secret: "secret_store"
  
+nautes:
+  namespace: nautes
+  secret_roles:
+    api: "API"
+    argo: "ARGO"
+    base: "BASE"
+    cluster: "CLUSTER"
+    repo: "REPO"
+    runtime: "RUNTIME"
+

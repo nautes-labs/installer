@@ -1,21 +1,21 @@
-p, API, git/*, ARGO, allow
+p, API, git/*, {{ nautes.secret_roles.argo }}, allow
 
-p, CLUSTER, git/data/gitlab/repo-{{ tenant_repo_id }}/default/readonly, ARGO, allow
-p, CLUSTER, cluster/*, RUNTIME, allow
+p, CLUSTER, git/data/gitlab/repo-{{ tenant_repo_id }}/default/readonly, {{ nautes.secret_roles.argo }}, allow
+p, CLUSTER, cluster/*, {{ nautes.secret_roles.runtime }}, allow
 
-p, RUNTIME, git/*, API, deny
-p, RUNTIME, git/*, ARGO, allow
-p, RUNTIME, git/*, BASE, deny
-p, RUNTIME, git/*, CLUSTER, deny
-p, RUNTIME, git/*, REPO, deny
-p, RUNTIME, git/*, RUNTIME, deny
+p, RUNTIME, git/*, {{ nautes.secret_roles.api }},       deny
+p, RUNTIME, git/*, {{ nautes.secret_roles.argo }},      allow
+p, RUNTIME, git/*, {{ nautes.secret_roles.base }},      deny
+p, RUNTIME, git/*, {{ nautes.secret_roles.cluster }},   deny
+p, RUNTIME, git/*, {{ nautes.secret_roles.repo }},      deny
+p, RUNTIME, git/*, {{ nautes.secret_roles.runtime }},   deny
 p, RUNTIME, git/*, *, allow
 
-p, RUNTIME, repo/*, API, deny
-p, RUNTIME, repo/*, ARGO, deny
-p, RUNTIME, repo/*, BASE, deny
-p, RUNTIME, repo/*, CLUSTER, deny
-p, RUNTIME, repo/*, REPO, deny
-p, RUNTIME, repo/*, RUNTIME, deny
+p, RUNTIME, repo/*, {{ nautes.secret_roles.api }},      deny
+p, RUNTIME, repo/*, {{ nautes.secret_roles.argo }},     deny
+p, RUNTIME, repo/*, {{ nautes.secret_roles.base }},     deny
+p, RUNTIME, repo/*, {{ nautes.secret_roles.cluster }},  deny
+p, RUNTIME, repo/*, {{ nautes.secret_roles.repo }},     deny
+p, RUNTIME, repo/*, {{ nautes.secret_roles.runtime }},  deny
 p, RUNTIME, repo/*, *, allow
 

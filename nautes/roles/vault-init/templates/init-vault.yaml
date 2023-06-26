@@ -41,51 +41,51 @@ authList:
     namespace: vault
 # ================================================================
 roleList:
-- name: api
+- name: "{{ nautes.secret_roles.api }}"
   authName: "{{ tenant_name }}"
   policies:
   - api-server
   k8sServiceAccountList:
   - name: api-server-manager
-    namespace: nautes
+    namespace: "{{ nautes.namespace }}"
 
-- name: argo
+- name: "{{ nautes.secret_roles.argo }}"
   authName: "{{ tenant_name }}"
   policies:
   - argo-operator
   k8sServiceAccountList:
   - name: argo-controller-manager
-    namespace: nautes
+    namespace: "{{ nautes.namespace }}"
 
-- name: base
+- name: "{{ nautes.secret_roles.base }}"
   authName: "{{ tenant_name }}"
   policies:
   - base-operator
   k8sServiceAccountList:
   - name: base-controller-manager
-    namespace: nautes
+    namespace: "{{ nautes.namespace }}"
 
-- name: cluster
+- name: "{{ nautes.secret_roles.cluster }}"
   authName: "{{ tenant_name }}"
   policies:
   - cluster-operator
   k8sServiceAccountList:
   - name: cluster-controller-manager
-    namespace: nautes
+    namespace: "{{ nautes.namespace }}"
 
-- name: repo
+- name: "{{ nautes.secret_roles.repo }}"
   authName: "{{ tenant_name }}"
   policies:
   - repo-operator
   k8sServiceAccountList:
   - name: repo-controller-manager
-    namespace: nautes
+    namespace: "{{ nautes.namespace }}"
 
-- name: runtime
+- name: "{{ nautes.secret_roles.runtime }}"
   authName: "{{ tenant_name }}"
   k8sServiceAccountList:
   - name: runtime-controller-manager
-    namespace: nautes
+    namespace: "{{ nautes.namespace }}"
 # ================================================================
 policyList:
 - name: api-server
