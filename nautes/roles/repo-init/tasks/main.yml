@@ -1,3 +1,34 @@
+- set_fact:
+    init_token: "{{ lookup('file', '{{ output_folder_gitrepo }}/init_token') }}"
+
+- name: Wait until HTTP status is 200
+  uri:
+    url: '{{ gitlab_external_url }}'
+    return_content: yes
+    validate_certs: no
+    status_code:
+      - 200
+  until: uri_output.status == 200
+  retries: 24 
+  delay: 5 
+  register: uri_output
+
+- name: Init gitlab
+  shell: |
+    python ./scripts/init-gitlab.py \
+     --token "{{ init_token }}" \
+     --gitlab_url "{{ gitlab_external_url }}" \
+     --group_name {{ tenant_name }} \
+     --project_name "{{ tenant_project_name }}" \
+     --app_call_back_url "{{ oauth_url }}/callback" \
+     --app_name "{{ oauth_app_name }}" \
+     --access_token_name "{{ base_opeartor_access_token_name }}"
+
+- name: Change file permissions
+  file:
+    path: "{{ output_folder_gitrepo }}/tenant_repo_private.key"
+    mode: '0600'
+
 - name: Add block of lines to /etc/hosts
   blockinfile:
     path: /etc/ssh/ssh_config

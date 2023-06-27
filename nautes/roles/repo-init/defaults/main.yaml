@@ -7,3 +7,7 @@ base_operator_image: "{{ docker_repository }}base-operator:{{ image_version }}"
 cluster_operator_image: "{{ docker_repository }}cluster-operator:{{ image_version }}"
 runtime_operator_image: "{{ docker_repository }}runtime-operator:{{ image_version }}"
 webhook_image: "{{ docker_repository }}webhook:{{ image_version }}"
+
+tenant_project_name: "management"
+oauth_app_name: "nautes"
+base_opeartor_access_token_name: "base-operator"

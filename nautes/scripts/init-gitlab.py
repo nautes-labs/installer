@@ -23,11 +23,12 @@ def generate():
 @click.option('--group_name', prompt='Please input group name')
 @click.option('--project_name', prompt='Please input project name')
 @click.option('--app_call_back_url', prompt='Please input call back url for app')
+@click.option('--app_name',default="nautes", prompt='The application name for oauth')
+@click.option('--access_token_name',default="base-operator", prompt='The name of the accesstoken for the base operator')
 @click.option('--output_base', default="/opt/out/git", help='The base folder to write init info')
-def main(gitlab_url, token, group_name, project_name, app_call_back_url, output_base):
+def main(gitlab_url, token, group_name, project_name, app_call_back_url, app_name, access_token_name, output_base):
     gl = gitlab.Gitlab(gitlab_url, private_token=token, ssl_verify=False)
 
-    app_name = "nautes"
     def create_gitlab_application():
         apps = gl.applications.list()
         for app in apps:
@@ -36,7 +37,6 @@ def main(gitlab_url, token, group_name, project_name, app_call_back_url, output_
         app = gl.applications.create({'name': app_name, 'redirect_uri': app_call_back_url, 'scopes': 'api read_api read_user read_repository openid profile email'})
         return app.application_id, app.secret
 
-    access_token_name = "base-operator"
     def create_access_token():
         # 1 is root ID
         user = gl.users.get(1)
@@ -98,6 +98,8 @@ def main(gitlab_url, token, group_name, project_name, app_call_back_url, output_
         with open(filePath, 'w') as f:
             yaml.dump(outputs, f)
 
+        if private_key == None:
+            return 
         sshKeyPath = os.path.join(output_base, "tenant_repo_private.key")
         with open(sshKeyPath, "w") as f:
             f.write(private_key)
