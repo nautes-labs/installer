@@ -31,8 +31,6 @@ alicloud_save_money: true
 # Token name witch used to get products from gitlab
 # base_opeartor_access_token_name: "base-operator"
 
-# repos_tenant_template_version: "support-change-namespace"
-
 # Customized configuration for nautes
 # nautes_namespace: nautes
 
