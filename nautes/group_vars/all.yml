@@ -15,7 +15,6 @@ gitlab_external_url: "https://{{ gitlab_ip }}:{{ gitlab_port }}"
 gitlab_ssh_addr: "ssh://git@{{ gitlab_ip }}:{{ gitlab_ssh_port }}"
 gitlab_ssh_port: 22
 
-vault_version: 1.10.4
 vault_port: "8200"
 vault_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:{{ vault_port }}"
 vault_proxy_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:8000"
