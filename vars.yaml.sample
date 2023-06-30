@@ -16,6 +16,17 @@ alicloud.save_money: true
 # Can be set to your company name, department name, or team name, etc.
 tenant_name: "nautes"
 
+# Customized configuration for nautes
+# nautes:
+#   namespace: nautes
+#   secret_roles:
+#     api: "API"
+#     argo: "ARGO"
+#     base: "BASE"
+#     cluster: "CLUSTER"
+#     repo: "REPO"
+#     runtime: "RUNTIME"
+
 # Default image repository address.
 # docker_repository: ghcr.io/nautes-labs/
 # Default image tag.
