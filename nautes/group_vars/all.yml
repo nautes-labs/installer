@@ -32,18 +32,13 @@ output_folder_k8s: "{{ output_folder }}/kubernetes"
 output_folder_secrepo: "{{ output_folder }}/vault"
 output_folder_service: "{{ output_folder }}/service"
 
-repos:
-  tenant_template:
-    url: https://github.com/nautes-labs/tenant-repo-template.git
-    version: main
-  cluster_template:
-    url: https://github.com/nautes-labs/cluster-templates.git
-  role_vault:
-    url: https://github.com/ansible-community/ansible-vault.git
-    version: master
-  role_gitlab:
-    url: https://github.com/geerlingguy/ansible-role-gitlab.git
-    version: master
+repos_tenant_template_url: https://github.com/nautes-labs/tenant-repo-template.git
+repos_tenant_template_version: main
+repos_cluster_template_url: https://github.com/nautes-labs/cluster-templates.git
+repos_role_vault_url: https://github.com/ansible-community/ansible-vault.git
+repos_role_vault_version: master
+repos_role_gitlab_url: https://github.com/geerlingguy/ansible-role-gitlab.git
+repos_role_gitlab_version: master
 
 flag:
   installation:
@@ -57,13 +52,12 @@ flag:
       nautes: "nautes"
       secret: "secret_store"
  
-nautes:
-  namespace: nautes
-  secret_roles:
-    api: "API"
-    argo: "ARGO"
-    base: "BASE"
-    cluster: "CLUSTER"
-    repo: "REPO"
-    runtime: "RUNTIME"
+nautes_namespace: nautes
+nautes_secret_roles:
+  api: "API"
+  argo: "ARGO"
+  base: "BASE"
+  cluster: "CLUSTER"
+  repo: "REPO"
+  runtime: "RUNTIME"
 

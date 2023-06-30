@@ -82,7 +82,6 @@ if [ "$1" == "debug" ]; then
         curl -L https://github.com/nautes-labs/init-vault/releases/download/v0.2.0/init-vault_linux_amd64.tar.gz | tar zx -C ./bin
     fi
     run_container "debug"
-    docker exec -i $CONTAINER_NAME clone-repos
     docker exec -it $CONTAINER_NAME sh
 elif [ "$1" == "destroy" ]; then
     run_container "destroy"

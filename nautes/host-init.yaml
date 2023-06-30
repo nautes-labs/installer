@@ -2,4 +2,4 @@
 - name: "Create hots"
   hosts: localhost
   roles:
-   - init-host
+   - host-init

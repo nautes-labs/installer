@@ -16,24 +16,29 @@ region_id: cn-hongkong
 zone_id: "cn-hongkong-b"
 
 # Create cloud server instances using 'Preemptible Instance' by default.
-alicloud.save_money: true
+alicloud_save_money: true
 
 # Can be set to your company name, department name, or team name, etc.
-tenant_name: "nautes"
+# It will be the group name in git registry.
+# tenant_name: "nautes"
+
+# The repo name of tenant repo
+# tenant_project_name: "management"
+
+# Oauth app name in git regitsry
+# oauth_app_name: "nautes"
+
+# Token name witch used to get products from gitlab
+# base_opeartor_access_token_name: "base-operator"
+
+# repos_tenant_template_version: "support-change-namespace"
 
 # Customized configuration for nautes
-# nautes:
-#   namespace: nautes
-#   secret_roles:
-#     api: "API"
-#     argo: "ARGO"
-#     base: "BASE"
-#     cluster: "CLUSTER"
-#     repo: "REPO"
-#     runtime: "RUNTIME"
+# nautes_namespace: nautes
 
 # Default image repository address.
 # docker_repository: ghcr.io/nautes-labs/
+
 # Default image tag.
 # image_version: latest
 
@@ -50,22 +55,22 @@ tenant_name: "nautes"
 vcluster_api_port: 32000
 
 # Specify which Kubernetes implementation to use, with options of K3s and K8s.
-deploy.kubernetes.type: k3s
+kubernetes_type: k3s
 # Specify the number of nodes for Kubernetes. When using K3s, only one node will be used.
-deploy.kubernetes.node_num: 1
+kubernetes_node_num: 1
 
 # Repository address and branch of tenant configuration repository template.
-repos.tenant_template.url: https://github.com/nautes-labs/tenant-repo-template.git
-repos.tenant_template.version: main
+repos_tenant_template_url: https://github.com/nautes-labs/tenant-repo-template.git
+repos_tenant_template_version: main
 
 # Repository address of cluster template.
-repos.cluster_template.url: https://github.com/nautes-labs/cluster-templates.git
+repos_cluster_template_url: https://github.com/nautes-labs/cluster-templates.git
 
 # Repository address and branch for ansible role used to install Vault.
-repos.role_vault.url: https://github.com/ansible-community/ansible-vault.git
-repos.role_vault.version: master
+repos_role_vault_url: https://github.com/ansible-community/ansible-vault.git
+repos_role_vault_version: master
 
 # Repository address and branch for ansible role used to install Gitlab.
 # For optional gitLab installation configuration items, please refer to the project https://github.com/geerlingguy/ansible-role-gitlab.
-repos.role_gitlab.url: https://github.com/geerlingguy/ansible-role-gitlab.git
-repos.role_gitlab.version: master
+repos_role_gitlab_url: https://github.com/geerlingguy/ansible-role-gitlab.git
+repos_role_gitlab_version: master

@@ -112,7 +112,7 @@ curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh |
 安装程序默认使用 [抢占式实例模式](https://help.aliyun.com/document_detail/52088.html?spm=5176.ecsbuyv3.0.0.2a2736756P0dh1) 创建云服务器，该模式存在实例被自动释放的风险。如果您希望体验更稳定的环境，请在 vars.yaml 增加以下配置，让安装程序切换至 [按量付费模式](https://help.aliyun.com/document_detail/40653.html?spm=5176.ecsbuyv3.0.0.2a2736756P0dh1) 申请资源。
 
 ```yaml
-alicloud.save_money: false
+alicloud_save_money: false
 ```
 
 两种付费模式的费用预估如下（不包含流量费）：
@@ -138,8 +138,8 @@ export INSTALLER_VERSION=vX.Y.Z
 安装开始前，在 vars.yaml 文件中添加以下配置。
 
 ```yaml
-repos.tenant_template.url: https://github.com/nautes-labs/tenant-repo-template.git
-repos.tenant_template.version: main
+repos_tenant_template_url: https://github.com/nautes-labs/tenant-repo-template.git
+repos_tenant_template_version: main
 ```
 
 ### 使用标准 K8s
@@ -147,8 +147,8 @@ repos.tenant_template.version: main
 安装开始前，在 vars.yaml 文件中添加以下配置。
 
 ```yaml
-deploy.kubernetes.type: k8s
-deploy.kubernetes.node_num: 3
+kubernetes_type: k8s
+kubernetes_node_num: 3
 ```
 
 ### 完整参数清单

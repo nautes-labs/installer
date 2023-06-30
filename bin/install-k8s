@@ -1,6 +1,6 @@
 #!/bin/sh
 
-KUBERNETES_TYPE=$(yq '.deploy.kubernetes.type' /opt/vars.yaml)
+KUBERNETES_TYPE=$(yq '.kubernetes_type' /opt/vars.yaml)
 if [ "$KUBERNETES_TYPE" = null ]; then
     KUBERNETES_TYPE="k3s"
 fi

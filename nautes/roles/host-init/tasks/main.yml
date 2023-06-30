@@ -39,19 +39,19 @@
   set_fact: 
     gits: "{{ gits | default([]) + [item] }}"
   loop: "{{ terraform_hosts }}"
-  when: item.type == host_type.git
+  when: item.type == _host_type.git
 
 - name: Grep kubernetes hosts from host info
   set_fact: 
     kubernetes: "{{ kubernetes | default([]) + [item] }}"
   loop: "{{ terraform_hosts }}"
-  when: item.type == host_type.kubernetes
+  when: item.type == _host_type.kubernetes
 
 - name: Grep secret hosts from host info
   set_fact: 
     secrets: "{{ secrets | default([]) + [item] }}"
   loop: "{{ terraform_hosts }}"
-  when: item.type == host_type.secret
+  when: item.type == _host_type.secret
 
 - name: Create file from template
   template:

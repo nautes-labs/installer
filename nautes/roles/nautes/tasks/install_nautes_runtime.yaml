@@ -41,7 +41,7 @@
   loop:
     - argocd
     - dex
-    - "{{ nautes.namespace }}"
+    - "{{ nautes_namespace }}"
 
 - name: Create secrets
   import_tasks: create_secret.yaml
