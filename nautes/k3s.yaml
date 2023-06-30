@@ -1,5 +1,9 @@
 - hosts: k8s-0
   tasks:
+  - name: Set hostname to inventory name
+    hostname:
+      name: "{{ inventory_hostname }}"
+
   - name: Install k3s
     shell: |
       curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.21.14+k3s1 INSTALL_K3S_EXEC="--tls-san {{ kube_entrypoint_ip }}" sh -s - server --disable servicelb --disable traefik --disable metrics-server
