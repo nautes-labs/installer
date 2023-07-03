@@ -2,5 +2,5 @@
 
 set -e
 
-ansible-playbook -e @/opt/vars.yaml /opt/nautes/host-init.yaml
+ansible-playbook -e @/tmp/vars/vars.yaml /opt/nautes/host-init.yaml
 ansible-playbook -i /opt/out/hosts/ansible_hosts /opt/nautes/wait-for-host-ready.yaml

@@ -8,9 +8,13 @@ fi
 
 NAUTES_PATH="/opt/nautes"
 NAUTES_LOG_PATH="${NAUTES_PATH}/out/logs"
+NAUTES_VAR_PATH="${NAUTES_PATH}/vars"
 
 function init() {
     mkdir -p ${NAUTES_LOG_PATH}
+    mkdir -p ${NAUTES_VAR_PATH}
+    cp vars.yaml ${NAUTES_VAR_PATH}
+
 }
 
 function run_container() {
@@ -34,7 +38,7 @@ ${EXTRA_MOUNT}"
          -v ${NAUTES_PATH}/out:/opt/out \
          -v ${NAUTES_PATH}/terraform:/tmp/terraform \
          -v ${NAUTES_PATH}/flags:/tmp/flags \
-         -v `pwd`/vars.yaml:/opt/vars.yaml \
+         -v ${NAUTES_VAR_PATH}:/tmp/vars \
          ghcr.io/nautes-labs/installer:${INSTALLER_VERSION} \
            tail -f /dev/null
     fi
