@@ -1,0 +1,1 @@
+k3s_installation_command: "curl -sfL https://get.k3s.io |"

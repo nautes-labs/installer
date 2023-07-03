@@ -4,9 +4,15 @@
     hostname:
       name: "{{ inventory_hostname }}"
 
+  - name: Change installaton command if use_chinese_mirror is set
+    set_fact:
+      k3s_installation_command: "curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | INSTALL_K3S_MIRROR=cn"
+    when: use_chinese_mirror is defined
+
+
   - name: Install k3s
     shell: |
-      curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.21.14+k3s1 INSTALL_K3S_EXEC="--tls-san {{ kube_entrypoint_ip }}" sh -s - server --disable servicelb --disable traefik --disable metrics-server
+      {{ k3s_installation_command }} INSTALL_K3S_VERSION=v1.21.14+k3s1 INSTALL_K3S_EXEC="--tls-san {{ kube_entrypoint_ip }}" sh -s - server --disable servicelb --disable traefik --disable metrics-server
       mkdir -p ${HOME}/.kube
       /bin/cp -f /etc/rancher/k3s/k3s.yaml ${HOME}/.kube/k3s-config
       /bin/cp -f /etc/rancher/k3s/k3s.yaml ${HOME}/.kube/config

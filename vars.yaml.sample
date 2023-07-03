@@ -18,6 +18,8 @@ zone_id: "cn-hongkong-b"
 # Create cloud server instances using 'Preemptible Instance' by default.
 alicloud_save_money: true
 
+# use_chinese_mirror=
+
 # Can be set to your company name, department name, or team name, etc.
 # It will be the group name in git registry.
 # tenant_name: "nautes"
