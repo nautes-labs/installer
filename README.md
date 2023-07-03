@@ -52,6 +52,8 @@ chmod +x installer.sh
 
 /opt/nautes/terraform 中存储了 terraform 的状态文件，记录了安装程序在阿里云上申请的资源清单。
 
+/opt/nautes/vars 中存储了用户安装配置文件的缓存。
+
 /opt/nautes/out 中存储了已安装组件的相关信息：
 
 - GitLab 用于托管租户的配置库，用户应用的源代码、部署清单和流水线配置等。GitLab 的管理员密码，以及租户配置库的访问信息等存储在 git 子目录下。
