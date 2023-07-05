@@ -241,22 +241,20 @@ kubernetes_node_num: 3
 
     标识符路径: /opt/nautes/flags/gitrepo
 
-    需要补充的文件:
+    需要补充的配置项:
 
-    1. /opt/nautes/git/init_token
-
-        存放了gitlab超管的access_token，该token会被用于创建项目，代码库，oauth app， access_token。安装完成后即可释放。
-
-    2.  gitlab ssh 端口的 known_hosts 文件
-
-        ```
-        known_hosts 文件的路径可能在gitlab.rb文件中配置。如果没有，那应该在 /etc/ssh/ 目录下。
-        ```
-        | 补充文件的路径 |
-        | --- |
-        | /opt/nautes/git/ssh_host_ecdsa_key.pub  |
-        | /opt/nautes/git/ssh_host_ed25519_key.pub |
-        | /opt/nautes/git/ssh_host_rsa_key.pub |
+    ```yaml
+    # Git 仓库的 HTTPS 访问地址。
+    git_external_url: "https://127.0.0.1:443"
+    # Git 仓库的 SSH 访问地址。
+    git_ssh_addr: "ssh://git@127.0.0.1:22"
+    # 拥有 api 和 sudo 权限的 token， 用于初始化租户配置库和 Git 仓库的全局配置。
+    git_init_token: ""
+    # Git 仓库的 CA 证书。
+    git_ca: ""
+    # SSH 访问时需要信任的 know host 信息。
+    git_ssh_fingerprints: []
+    ```
 
   - 创建 nautes 在 git 仓库中所需要的资源 及 租户配置库
 
