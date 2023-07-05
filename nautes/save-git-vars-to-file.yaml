@@ -4,7 +4,7 @@
     copy:
       content: "{{ git_init_token }}"
       dest: "{{ _tmp_file.git.init_token }}"
-    when: git_init_token != ""
+    when: git_init_token is defined and git_init_token != ""
 
   - name: Create finger prints file
     copy:
