@@ -1,4 +1,4 @@
-gitlab_url: "{{ gitlab_external_url }}"
+gitlab_url: "{{ git_external_url }}"
 vault_url: "{{ vault_url }}"
 oauth_url: "{{ oauth_url }}"
 vcluster_api_server_url: "https://{{ kube_entrypoint_ip }}:{{ vcluster_api_port }}"

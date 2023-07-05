@@ -43,12 +43,12 @@ resource "alicloud_security_group_rule" "kube-apiserver" {
   cidr_ip           = "0.0.0.0/0"
 }
 
-resource "alicloud_security_group_rule" "https" {
+resource "alicloud_security_group_rule" "gitlab" {
   type              = "ingress"
   ip_protocol       = "tcp"
   nic_type          = "intranet"
   policy            = "accept"
-  port_range        = "{{ gitlab_port }}/{{ gitlab_port }}"
+  port_range        = "31443/31443"
   priority          = 1
   security_group_id = alicloud_security_group.default.id
   cidr_ip           = "0.0.0.0/0"

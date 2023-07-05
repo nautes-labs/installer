@@ -2,9 +2,18 @@
     git_info: "{{ lookup('file', '{{ output_folder_gitrepo }}/infos.yaml' )|from_yaml }}"
 
 - set_fact:
-    gitlab_knowhost_rsa: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_rsa_key.pub' ) }}"
-    gitlab_knowhost_ecdsa: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_ecdsa_key.pub' ) }}"
-    gitlab_knowhost_ed25519: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_ed25519_key.pub' ) }}"
+    git_ssh_domain: '{{ git_ssh_addr | urlsplit("hostname") }}'
+    git_ssh_fingerprints: "{{ lookup('file', _tmp_file.git.fingerprint) }}"
+ 
+- set_fact:
+    know_host_port: '{{ git_ssh_addr | urlsplit("port") }}'
+    know_host_url: '{{ git_ssh_addr | urlsplit("hostname") }}'
+
+- set_fact:
+    know_host_url: '[{{ know_host_url }}]:{{ know_host_port }}'
+  when: know_host_port != "" and know_host_port != "22"
+
+- set_fact:
     tenant_repo_ssh_addr: "{{ git_info.tenant_repo_ssh_addr }}"
     oauth_clientID: "{{ git_info.client_id }}"
     oauth_client_secret: "{{ git_info.client_sercret }}"

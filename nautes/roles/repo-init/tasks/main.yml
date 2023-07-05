@@ -1,9 +1,23 @@
 - set_fact:
-    init_token: "{{ lookup('file', '{{ output_folder_gitrepo }}/init_token') }}"
+    init_token: "{{ lookup('file', _tmp_file.git.init_token) }}"
+    git_ca: "{{ lookup('file', _tmp_file.git.ca) }}"
+    git_ssh_domain: '{{ git_ssh_addr | urlsplit("hostname") }}'
+    git_ssh_fingerprints: "{{ lookup('file', _tmp_file.git.fingerprint) }}"
+ 
+- set_fact:
+    know_host_port: '{{ git_ssh_addr | urlsplit("port") }}'
+    know_host_url: '{{ git_ssh_addr | urlsplit("hostname") }}'
+
+- set_fact:
+    know_host_url: '[{{ know_host_url }}]:{{ know_host_port }}'
+  when: know_host_port != "" and know_host_port != "22"
+
+- set_fact:
+    sec_ca: "{{ lookup('file', '{{ output_folder_pki }}/ca.crt') }}"
 
 - name: Wait until HTTP status is 200
   uri:
-    url: '{{ gitlab_external_url }}'
+    url: '{{ git_external_url }}'
     return_content: yes
     validate_certs: no
     status_code:
@@ -17,7 +31,7 @@
   shell: |
     python ./scripts/init-gitlab.py \
      --token "{{ init_token }}" \
-     --gitlab_url "{{ gitlab_external_url }}" \
+     --gitlab_url "{{ git_external_url }}" \
      --group_name {{ tenant_name }} \
      --project_name "{{ tenant_project_name }}" \
      --app_call_back_url "{{ oauth_url }}/callback" \
@@ -33,7 +47,7 @@
   blockinfile:
     path: /etc/ssh/ssh_config
     block: |
-      Host {{ gitlab_ip }}
+      Host {{ git_ssh_domain }}
           PasswordAuthentication yes
           StrictHostKeyChecking no
           UserKnownHostsFile /dev/null
@@ -56,13 +70,9 @@
   when: not dex_client_secret_file.stat.exists
 
 - set_fact:
-    git_info: "{{ lookup('file', '{{ output_folder_gitrepo }}/infos.yaml' )|from_yaml }}"
+    git_info: "{{ lookup('file', '{{ output_folder_gitrepo }}/infos.yaml' )| from_yaml }}"
 
 - set_fact:
-    ca_info: "{{ lookup('file', '{{ output_folder_pki }}/ca.crt' ) }}"
-    gitlab_knowhost_rsa: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_rsa_key.pub' ) }}"
-    gitlab_knowhost_ecdsa: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_ecdsa_key.pub' ) }}"
-    gitlab_knowhost_ed25519: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_ed25519_key.pub' ) }}"
     tenant_repo_id: "{{ git_info.tenant_repo_id }}"
     tenant_repo_ssh_addr: "{{ git_info.tenant_repo_ssh_addr }}"
     oauth_clientID: "{{ git_info.client_id }}"

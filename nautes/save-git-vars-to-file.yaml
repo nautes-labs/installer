@@ -1,0 +1,20 @@
+- hosts: localhost
+  tasks:
+  - name: Create init token file
+    copy:
+      content: "{{ git_init_token }}"
+      dest: "{{ _tmp_file.git.init_token }}"
+    when: git_init_token != ""
+
+  - name: Create finger prints file
+    copy:
+      content: "{{ git_ssh_fingerprints }}"
+      dest: "{{ _tmp_file.git.fingerprint }}"
+    when: git_ssh_fingerprints is defined
+
+  - name: Create git registry ca file
+    copy:
+      content: "{{ git_ca }}"
+      dest: "{{ _tmp_file.git.ca }}"
+    when: git_ca is defined
+ 

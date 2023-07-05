@@ -11,3 +11,4 @@ webhook_image: "{{ docker_repository }}webhook:{{ image_version }}"
 tenant_project_name: "management"
 oauth_app_name: "nautes"
 base_opeartor_access_token_name: "base-operator"
+

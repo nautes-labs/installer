@@ -7,16 +7,21 @@ kube_entrypoint_domain: "{{ kube_entrypoint_ip }}.nip.io"
 
 oauth_domain: "dex.{{ kube_entrypoint_domain }}"
 oauth_url: "https://{{ oauth_domain }}:31443"
-oauth_source_url: "{{ gitlab_external_url }}"
+oauth_source_url: "{{ git_external_url }}"
 
 gitlab_ip: "{{ hostvars[groups['gitlab'][0]].ansible_host }}"
 gitlab_port: 31443
-gitlab_external_url: "https://{{ gitlab_ip }}:{{ gitlab_port }}"
-gitlab_ssh_addr: "ssh://git@{{ gitlab_ip }}:{{ gitlab_ssh_port }}"
-gitlab_ssh_port: 22
+gitlab_ssh_port: "{{ ansible_ssh_port | default(22) }}"
 
-vault_port: "8200"
+git_registry_type: "gitlab"
+git_external_url: "https://{{ gitlab_ip }}:{{ gitlab_port }}"
+git_ssh_addr: "ssh://git@{{ gitlab_ip }}:{{ gitlab_ssh_port }}"
+# git_init_token: 
+# git_ca:
+# git_ssh_fingerprints: []
+
 vault_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:{{ vault_port }}"
+vault_port: "8200"
 vault_proxy_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:8000"
 
 vcluster_api_port: 32000
@@ -61,3 +66,11 @@ nautes_secret_roles:
   repo: "REPO"
   runtime: "RUNTIME"
 
+_tmp_file:
+  git:
+    init_token: "{{ output_folder_gitrepo }}/init_token"
+    fingerprint: /tmp/git_fingers.yaml
+    ca: /tmp/git_ca.crt
+  secret:
+    ca: /tmp/sec_ca.crt
+ 

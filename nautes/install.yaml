@@ -5,6 +5,7 @@
     file:
       path: "{{ flag.installation.path }}"
       state: directory
+
   - name: Check init is completed
     stat:
       path: "{{ flag.installation.path }}/{{ flag.installation.name.init  }}"
@@ -40,6 +41,8 @@
       path: "{{ flag.installation.path }}/{{ flag.installation.name.init }}"
       state: touch
 
+- import_playbook: save-git-vars-to-file.yaml
+
 - import_playbook: gitlab.yaml
   when: not hostvars["localhost"].git_completed.stat.exists
 
@@ -50,7 +53,7 @@
       path: "{{ flag.installation.path }}/{{ flag.installation.name.git }}"
       state: touch
 
-- import_playbook: push-git.yaml
+- import_playbook: repo-init.yaml
   when: not hostvars["localhost"].tenant_repo_completed.stat.exists
 
 - hosts: localhost
