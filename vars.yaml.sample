@@ -16,24 +16,25 @@ region_id: cn-hongkong
 zone_id: "cn-hongkong-b"
 
 # Create cloud server instances using 'Preemptible Instance' by default.
-alicloud_save_money: true
+# alicloud_save_money: true
 
-# use_chinese_mirror=
+# If this variable is defined, k3s installation will use chinese mirror.
+# use_chinese_mirror: ""
 
 # Can be set to your company name, department name, or team name, etc.
 # It will be the group name in git registry.
 # tenant_name: "nautes"
 
-# The repo name of tenant repo
+# The repo name of tenant repo.
 # tenant_project_name: "management"
 
-# Oauth app name in git regitsry
+# Oauth app name in git regitsry.
 # oauth_app_name: "nautes"
 
-# Token name witch used to get products from gitlab
+# Token name witch used to get products from gitlab.
 # base_opeartor_access_token_name: "base-operator"
 
-# Customized configuration for nautes
+# Customized configuration for nautes.
 # nautes_namespace: nautes
 
 # Default image repository address.
@@ -51,26 +52,33 @@ alicloud_save_money: true
 # webhook_image: ghcr.io/nautes-labs/webhook:latest
 # vault_proxy_image: ghcr.io/nautes-labs/vault-proxy:latest
 
+# If user need to use an existing git registry, fill in the following variables.
+# git_external_url: ""
+# git_ssh_addr: ""
+# git_init_token: ""
+# git_ca: ""
+# git_ssh_fingerprints: []
+
 # The NodePort of tenant management cluster.
-vcluster_api_port: 32000
+# vcluster_api_port: 32000
 
 # Specify which Kubernetes implementation to use, with options of K3s and K8s.
-kubernetes_type: k3s
+# kubernetes_type: k3s
 # Specify the number of nodes for Kubernetes. When using K3s, only one node will be used.
-kubernetes_node_num: 1
+# kubernetes_node_num: 1
 
 # Repository address and branch of tenant configuration repository template.
-repos_tenant_template_url: https://github.com/nautes-labs/tenant-repo-template.git
-repos_tenant_template_version: main
+# repos_tenant_template_url: https://github.com/nautes-labs/tenant-repo-template.git
+# repos_tenant_template_version: main
 
 # Repository address of cluster template.
-repos_cluster_template_url: https://github.com/nautes-labs/cluster-templates.git
+# repos_cluster_template_url: https://github.com/nautes-labs/cluster-templates.git
 
 # Repository address and branch for ansible role used to install Vault.
-repos_role_vault_url: https://github.com/ansible-community/ansible-vault.git
-repos_role_vault_version: master
+# repos_role_vault_url: https://github.com/ansible-community/ansible-vault.git
+# repos_role_vault_version: master
 
 # Repository address and branch for ansible role used to install Gitlab.
 # For optional gitLab installation configuration items, please refer to the project https://github.com/geerlingguy/ansible-role-gitlab.
-repos_role_gitlab_url: https://github.com/geerlingguy/ansible-role-gitlab.git
-repos_role_gitlab_version: master
+# repos_role_gitlab_url: https://github.com/geerlingguy/ansible-role-gitlab.git
+# repos_role_gitlab_version: master

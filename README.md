@@ -31,7 +31,7 @@ EOT
 执行以下命令进行默认安装。
 
 ```bash
-curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -
+curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh | bash -s install
 ```
 
 或者
@@ -39,7 +39,7 @@ curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh |
 ```bash
 curl -OL https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh
 chmod +x installer.sh
-./installer.sh
+./installer.sh install
 ```
 
 > 默认安装单节点的 K3s ，根据安装机公网带宽大小，整个安装过程预计耗时15~25分钟。安装成功后，您可以在 /opt/nautes 目录下找到安装后的组件信息。如果安装失败，您可以通过 /opt/nautes/out/logs 目录下的日志排查问题。
@@ -157,22 +157,48 @@ kubernetes_node_num: 3
 
 请参考 [vars.yaml.sample](https://github.com/nautes-labs/installer/blob/main/vars.yaml.sample)。
 
-### 跳过安装步骤
+### 选择性安装
 
-用户可以根据自己的情况跳过安装步骤， 例如：用户已经有正在使用中的 gitlab， 用户已经准备好了机器和 k8s环境。
+用户可以根据自己的情况跳过安装步骤， 例如：用户已经准备好了物理机器，k8s 环境和 gitlab 服务, 可以通过以下命令跳过这些步骤。
+```shell
+./installer progress skip create_host kubernetes git
+```
 
-用户如果需要跳过某个安装步骤，需要在对应的路径创建标识符(空文件即可)，并补充后续安装所需要的内容。
+如果用户需要重新执行已经完成的安装步骤，则可以通过以下命令把步骤标识为未完成的状态。
 
-已完成的步骤会自动创建标识符，如果需要重新执行，需要到 /opt/nautes/flags 下删除对应的标识符。
+```shell
+./installer progress do create_host kubernetes
+./installer install
+```
 
-- 创建运行机器
+>该操作只是标识为未完成，没有清理的步骤和执行安装的操作，需要重新执行install命令安装。
+>
+>后续步骤可能依赖前置步骤。只启用前置步骤的重装可能导致环境失效。
 
-    标识符路径: /opt/nautes/flags/create_host
+查看安装进度及可操作的节点。(部分节点不支持跳过)
+```shell
+./installer progress show
+## Install Progress
+#create_host:   clear
+#kubernetes:    clear
+#init:          not clear
+#git:           clear
+#tenant_init:   not clear
+#nautes:        not clear
+```
+
+- 跳过创建运行机器
+
+    命令：
+    ```yaml
+    ./installer progress skip create_host
+    ```
 
     需要补充的文件:
 
     1. /opt/nautes/out/hosts/ansible_hosts
         ```yaml
+        # 使用已有的gitlab的情况下可以不用填写gitlab信息
         [gitlab]
         gitlab-0 ansible_host=${ gitlab host ip }
 
@@ -190,7 +216,7 @@ kubernetes_node_num: 3
         kube_node
 
         [vault]
-        vault-0 ansible_host=${ vault host ip}
+        vault-0 ansible_host=${ vault host ip }
 
         [all:vars]
         no_log=true
@@ -200,15 +226,18 @@ kubernetes_node_num: 3
 
         所有机器可以通过这对密钥访问到root账号。
 
- - 安装 kubernetes 集群
+    备注：目前安装程序在跳过 gitlab 和 k8s 的安装的情况下，依旧会创建对应的机器。
 
-    标识符路径: /opt/nautes/flags/kubernetes
+ - 跳过安装 kubernetes 集群
 
-    需要补充的文件: 无
+    命令：
+    ```yaml
+    ./installer progress skip kubernetes
+    ```
 
     备注: 需要保证节点 k8s-0 中存在文件 /root/.kube/config，可以通过该文件以管理员身份操作集群。
 
- - 证书生成
+ - 跳过证书生成
 
     步骤说明：该步骤会生成整套系统所需的所有密钥对。具体如下:
     | 文件名 | 用途 |
@@ -228,18 +257,41 @@ kubernetes_node_num: 3
     | entrypoint.key | nautes 服务 https 端口的私钥 |
     | entrypoint.crt | nautes 服务 https 端口的公钥 |
 
-    标识符路径：/opt/nautes/flags/init
+    命令：
+    ```yaml
+    ./installer progress skip init
+    ```
 
-    需要补充的文件: 步骤说明中出现的所有文件。
+    需要补充的文件:
+
+    | 文件名 | 备注 |
+    | --- | --- |
+    | /opt/nautes/out/pki/ca.crt |
+    | /opt/nautes/out/pki/API.key |
+    | /opt/nautes/out/pki/API.crt |
+    | /opt/nautes/out/pki/CLUSTER.key |
+    | /opt/nautes/out/pki/CLUSTER.crt |
+    | /opt/nautes/out/pki/RUNTIME.key |
+    | /opt/nautes/out/pki/RUNTIME.crt |
+    | /opt/nautes/out/pki/gitlab-0.key | 通过安装程序部署gitlab时需要提供 |
+    | /opt/nautes/out/pki/gitlab-0.crt | 通过安装程序部署gitlab时需要提供 |
+    | /opt/nautes/out/pki/vault-0.key |
+    | /opt/nautes/out/pki/vault-0.crt |
+    | /opt/nautes/out/pki/entrypoint.key |
+    | /opt/nautes/out/pki/entrypoint.crt |
 
     备注:
     1. 本安装程序暂不支持不同用途的证书使用不同的ca进行签发。
     2. nautes 服务访问 vault proxy 的密钥对签发请参考[这里](https://github.com/nautes-labs/vault-proxy/blob/main/README.md)。
-    3. entrypoint 密钥对需要签发的域名为 "*.{{ 集群的访问入口 }}"， 在没有修改变量 "kube_entrypoint_domain" 的情况下，默认是 "{{ k8s-0 的ip }}.nip.io"。
+    3. entrypoint 密钥对需要签发的域名为 "*.{{ 集群的访问入口 }}"， 在没有修改变量 "kube_entrypoint_domain" 的情况下，默认是 "{{ k8s-0 的 ip }}.nip.io"。
 
-  - 安装 gitlab
 
-    标识符路径: /opt/nautes/flags/gitrepo
+  - 跳过安装 gitlab
+
+    命令：
+    ```yaml
+    ./installer progress skip git
+    ```
 
     需要补充的配置项:
 
@@ -252,21 +304,18 @@ kubernetes_node_num: 3
     git_init_token: ""
     # Git 仓库的 CA 证书。
     git_ca: ""
-    # SSH 访问时需要信任的 know host 信息。
+    # SSH 访问时需要信任的 know hosts 信息。
+    # known hosts 文件的路径可能在gitlab.rb文件中配置。如果没有，默认在 /etc/ssh/ 目录下。
     git_ssh_fingerprints: []
     ```
 
   - 创建 nautes 在 git 仓库中所需要的资源 及 租户配置库
 
-    标识符路径: /opt/nautes/flags/tenant_repo
-
-    备注：此步骤不支持人工完成。
+    备注：此步骤不支持跳过。
 
   - 在k8s中安装nautes
 
-    标识符路径: /opt/nautes/flags/nautes
-
-    备注：此步骤不支持人工完成。
+    备注：此步骤不支持跳过。
 
 ## 常见问题
 
