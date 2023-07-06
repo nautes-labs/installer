@@ -6,6 +6,14 @@
     sec_ca: "{{ lookup('file', '{{ output_folder_pki }}/ca.crt') }}"
 
 - set_fact:
+    git_http_domain: '{{ git_external_url | urlsplit("hostname") }}'
+    git_http_port: '{{ git_external_url | urlsplit("port") | default("443") }}'
+ 
+- set_fact:
+    git_http_domain: '{{ git_http_domain }}_{{ git_http_port }}'
+  when: git_http_port != 443
+
+- set_fact:
     git_ssh_port: '{{ git_ssh_addr | urlsplit("port")  | default("22") }}'
     git_ssh_hostname: '{{ git_ssh_addr | urlsplit("hostname") }}'
 
