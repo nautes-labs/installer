@@ -57,7 +57,6 @@ zone_id: "cn-hongkong-b"
 # git_ssh_addr: ""
 # git_init_token: ""
 # git_ca: ""
-# git_ssh_fingerprints: []
 
 # The NodePort of tenant management cluster.
 # vcluster_api_port: 32000

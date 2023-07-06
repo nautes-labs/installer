@@ -2,16 +2,15 @@
     git_info: "{{ lookup('file', '{{ output_folder_gitrepo }}/infos.yaml' )|from_yaml }}"
 
 - set_fact:
-    git_ssh_domain: '{{ git_ssh_addr | urlsplit("hostname") }}'
-    git_ssh_fingerprints: "{{ lookup('file', _tmp_file.git.fingerprint) }}"
- 
-- set_fact:
-    know_host_port: '{{ git_ssh_addr | urlsplit("port") }}'
-    know_host_url: '{{ git_ssh_addr | urlsplit("hostname") }}'
+    git_ssh_port: '{{ git_ssh_addr | urlsplit("port")  | default("22") }}'
+    git_ssh_hostname: '{{ git_ssh_addr | urlsplit("hostname") }}'
+
+- name: Get public key
+  shell: ssh-keyscan -p "{{ git_ssh_port }}" "{{ git_ssh_hostname }}"
+  register: public_key
 
 - set_fact:
-    know_host_url: '[{{ know_host_url }}]:{{ know_host_port }}'
-  when: know_host_port != "" and know_host_port != "22"
+    git_ssh_knowhosts: "{{ public_key.stdout }}"
 
 - set_fact:
     tenant_repo_ssh_addr: "{{ git_info.tenant_repo_ssh_addr }}"

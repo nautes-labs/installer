@@ -34,26 +34,6 @@
     loop: 
       - /etc/gitlab/initial_root_password
 
-  - name: Load gitlab fingerprints 
-    command: "cat /etc/ssh/ssh_host_rsa_key.pub"
-    register: rsa_fingerprint
-  - name: Load gitlab fingerprints 
-    command: "cat /etc/ssh/ssh_host_ecdsa_key.pub"
-    register: ecdsa_fingerprint
-  - name: Load gitlab fingerprints 
-    command: "cat /etc/ssh/ssh_host_ed25519_key.pub"
-    register: ed25519_fingerprint
-
-  - name: "Set fingerprints"
-    set_fact:
-      fingerprints: "{{ [rsa_fingerprint.stdout, ecdsa_fingerprint.stdout, ed25519_fingerprint.stdout] }}"
-
-  - name: Save fingerprints to file
-    copy:
-      content: "{{ fingerprints }}"
-      dest: "{{ _tmp_file.git.fingerprint }}"
-    delegate_to: localhost
-
   - name: Check init token exists
     stat:
       path: "{{ _tmp_file.git.init_token }}"

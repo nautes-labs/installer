@@ -6,12 +6,6 @@
       dest: "{{ _tmp_file.git.init_token }}"
     when: git_init_token is defined and git_init_token != ""
 
-  - name: Create finger prints file
-    copy:
-      content: "{{ git_ssh_fingerprints }}"
-      dest: "{{ _tmp_file.git.fingerprint }}"
-    when: git_ssh_fingerprints is defined
-
   - name: Create git registry ca file
     copy:
       content: "{{ git_ca }}"

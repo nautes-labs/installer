@@ -161,14 +161,14 @@ kubernetes_node_num: 3
 
 用户可以根据自己的情况跳过安装步骤， 例如：用户已经准备好了物理机器，k8s 环境和 gitlab 服务, 可以通过以下命令跳过这些步骤。
 ```shell
-./installer progress skip create_host kubernetes git
+./installer.sh progress skip create_host kubernetes git
 ```
 
 如果用户需要重新执行已经完成的安装步骤，则可以通过以下命令把步骤标识为未完成的状态。
 
 ```shell
-./installer progress do create_host kubernetes
-./installer install
+./installer.sh progress do create_host kubernetes
+./installer.sh install
 ```
 
 >该操作只是标识为未完成，没有清理的步骤和执行安装的操作，需要重新执行install命令安装。
@@ -177,7 +177,7 @@ kubernetes_node_num: 3
 
 查看安装进度及可操作的节点。(部分节点不支持跳过)
 ```shell
-./installer progress show
+./installer.sh progress show
 ## Install Progress
 #create_host:   clear
 #kubernetes:    clear
@@ -191,7 +191,7 @@ kubernetes_node_num: 3
 
     命令：
     ```yaml
-    ./installer progress skip create_host
+    ./installer.sh progress skip create_host
     ```
 
     需要补充的文件:
@@ -232,7 +232,7 @@ kubernetes_node_num: 3
 
     命令：
     ```yaml
-    ./installer progress skip kubernetes
+    ./installer.sh progress skip kubernetes
     ```
 
     备注: 需要保证节点 k8s-0 中存在文件 /root/.kube/config，可以通过该文件以管理员身份操作集群。
@@ -259,7 +259,7 @@ kubernetes_node_num: 3
 
     命令：
     ```yaml
-    ./installer progress skip init
+    ./installer.sh progress skip init
     ```
 
     需要补充的文件:
@@ -290,7 +290,7 @@ kubernetes_node_num: 3
 
     命令：
     ```yaml
-    ./installer progress skip git
+    ./installer.sh progress skip git
     ```
 
     需要补充的配置项:
@@ -304,9 +304,6 @@ kubernetes_node_num: 3
     git_init_token: ""
     # Git 仓库的 CA 证书。
     git_ca: ""
-    # SSH 访问时需要信任的 know hosts 信息。
-    # known hosts 文件的路径可能在gitlab.rb文件中配置。如果没有，默认在 /etc/ssh/ 目录下。
-    git_ssh_fingerprints: []
     ```
 
   - 创建 nautes 在 git 仓库中所需要的资源 及 租户配置库

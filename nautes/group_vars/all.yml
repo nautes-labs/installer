@@ -18,7 +18,6 @@ git_external_url: "https://{{ gitlab_ip }}:{{ gitlab_port }}"
 git_ssh_addr: "ssh://git@{{ gitlab_ip }}:{{ gitlab_ssh_port }}"
 # git_init_token: 
 # git_ca:
-# git_ssh_fingerprints: []
 
 vault_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:{{ vault_port }}"
 vault_port: "8200"
