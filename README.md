@@ -204,7 +204,7 @@ kubernetes_node_num: 3
     ./installer.sh progress skip host
     ```
 
-    需要在 vars.yaml 中补充的补充的配置项:
+    需要在 vars.yaml 中补充的配置项:
     ```yaml
     # 机器的访问信息。
     ansible_inventory_file: |
@@ -248,7 +248,7 @@ kubernetes_node_num: 3
      ./installer.sh progress skip kubernetes
      ```
 
-     需要在 vars.yaml 中补充的补充的配置项:
+     需要在 vars.yaml 中补充的配置项:
      ```yaml
      kube_apiserver_kubeconfig: |
        apiVersion: v1
@@ -280,7 +280,7 @@ kubernetes_node_num: 3
       ./installer.sh progress skip git
       ```
 
-      需要在 vars.yaml 中补充的补充的配置项:
+      需要在 vars.yaml 中补充的配置项:
       ```yaml
       # Git 仓库的 HTTPS 访问地址。
       git_external_url: "https://127.0.0.1:443"
