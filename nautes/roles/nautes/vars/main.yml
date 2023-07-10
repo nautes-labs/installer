@@ -1,2 +1,2 @@
 argocd_admin_password_output: "{{ output_folder }}/argocd/admin.password"
-tenant_cluster_apiserver_url: "{{ kube_entrypoint_ip }}:{{ vcluster_api_port }}"
+tenant_cluster_apiserver_url: "{{ vcluster_api_domain }}:{{ vcluster_api_port }}"

@@ -1,6 +1,23 @@
+- name: Static variable check
+  fail:
+    msg: "Neither group 'kube_control_plane' nor variable 'kube_apiserver_kubeconfig' is defined"
+  when: groups['kube_control_plane'] is not defined and kube_apiserver_kubeconfig is not defined
+
 - set_fact:
     entrypoint_crt: "{{ lookup('file', '{{ output_folder_pki }}/entrypoint.crt' ) | b64encode }}"
     entrypoint_key: "{{ lookup('file', '{{ output_folder_pki }}/entrypoint.key' ) | b64encode }}"
+
+- name: Create kubernetes config path
+  file:
+    path: "~/.kube"
+    state: directory
+  delegate_to: localhost
+
+- name: Save host cluster kubeconfig as the default kubeconfig
+  copy:
+    content: "{{ kube_apiserver_kubeconfig }}"
+    dest: ~/.kube/config
+  when: groups['kube_control_plane'] is not defined and kube_apiserver_kubeconfig is defined
 
 - name: Check if helm exists
   shell: "command -v helm"
@@ -108,12 +125,6 @@
     name: "vc-{{ tenant_name}}"
     namespace: "{{ tenant_name }}"
   register: vcluster_kubeconfig
-
-- name: Create kubernetes config path
-  file:
-    path: "~/.kube"
-    state: directory
-  delegate_to: localhost
 
 - name: Save kubeconfig in local
   shell: "echo {{ vcluster_kubeconfig.resources[0].data.config }}| base64 -d > ~/.kube/config "

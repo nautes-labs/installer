@@ -24,7 +24,10 @@ callbacks_enabled = profile_tasks\n'\
 >> /etc/ansible/ansible.cfg \
  && curl -o /usr/local/bin/kubectl -L https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \
  && chmod +x /usr/local/bin/kubectl \
- && curl -L https://github.com/nautes-labs/init-vault/releases/download/v0.2.0/init-vault_linux_amd64.tar.gz | tar zx -C /opt/bin 
+ && curl -L https://get.helm.sh/helm-v3.9.0-linux-amd64.tar.gz | tar zx -C /tmp/ \
+ && mv /tmp/linux-amd64/helm /usr/local/bin/helm \
+ && curl -L https://github.com/nautes-labs/init-vault/releases/download/v0.2.0/init-vault_linux_amd64.tar.gz | tar zx -C /opt/bin \
+ && rm -rf /tmp/*
 
 COPY nautes /opt/nautes
 RUN set -x \

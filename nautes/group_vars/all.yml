@@ -2,8 +2,18 @@
 tenant_name: "nautes"
 
 # Don't modify without knowing what you are doing
-kube_entrypoint_ip: "{{ hostvars[groups['kube_control_plane'][0]].ansible_host }}"
-kube_entrypoint_domain: "{{ kube_entrypoint_ip }}.nip.io"
+kube_entrypoint_ip: "{% if groups['kube_control_plane'] is defined and groups['kube_control_plane'] | length != 0 -%}
+{{ hostvars[groups['kube_control_plane'][0]].ansible_host }}
+{%- else -%}{%- endif %}"
+
+# kube_apiserver_kubeconfig: ""
+_kube_apiserver_domain: "{{ kube_apiserver_kubeconfig | default('') | from_yaml | json_query('clusters[0].cluster.server') | regex_search('https?://([\\w\\d.-]+)') | regex_replace('^https?://', '') }}"
+_kube_apiserver_domain_is_ip: "{{ true if _kube_apiserver_domain.split('.') | length == 4 and _kube_apiserver_domain.split('.') | map('int')|map('string') | join('.') == _kube_apiserver_domain else false }}"
+
+kube_entrypoint_domain: "{% if kube_entrypoint_ip != '' -%}
+{{ kube_entrypoint_ip }}.nip.io
+{%- elif kube_apiserver_kubeconfig is defined -%}
+{{ _kube_apiserver_domain }}{% if _kube_apiserver_domain_is_ip %}.nip.io{% endif %}{%- endif -%}"
 
 oauth_domain: "dex.{{ kube_entrypoint_domain }}"
 oauth_url: "https://{{ oauth_domain }}:31443"
@@ -23,10 +33,13 @@ vault_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:{{ vault_por
 vault_port: "8200"
 vault_proxy_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:8000"
 
+
+vcluster_api_domain: "{{ kube_entrypoint_domain }}"
 vcluster_api_port: 32000
-nautes_api_server_domain: "apiserver.{{ kube_entrypoint_ip }}.nip.io"
+
+nautes_api_server_domain: "apiserver.{{ kube_entrypoint_domain }}"
+argocd_dashboard_domain: "argocd.{{ kube_entrypoint_domain }}"
 argocd_api_url: "https://{{ argocd_dashboard_domain }}:31443"
-argocd_dashboard_domain: "argocd.{{ kube_entrypoint_ip }}.nip.io"
 
 output_folder: /opt/out
 output_folder_pki: "{{ output_folder }}/pki"
@@ -48,8 +61,8 @@ flag:
   installation:
     path: "/tmp/flags"
     name:
-      host: "hosts"
-      kubernetes: "k8s"
+      host: "create_host"
+      kubernetes: "kubernetes"
       init: "init"
       git: "gitrepo"
       tenant_repo: "tenant_repo"

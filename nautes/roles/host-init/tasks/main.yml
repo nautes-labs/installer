@@ -1,3 +1,15 @@
+- stat:
+    path: "{{ output_folder_hosts }}/ansible_hosts"
+  register: _ansible_host_file
+
+- stat:
+    path: "{{ flag.installation.path }}/{{ flag.installation.name.git }}"
+  register: _skip_git_flag
+
+- stat:
+    path: "{{ flag.installation.path }}/{{ flag.installation.name.kubernetes }}"
+  register:  _skip_kubernetes_flag
+
 - name: Ensure destination directory exists
   file:
     path: /tmp/terraform
@@ -25,6 +37,7 @@
   template:
     src: main.tf.j2
     dest: /tmp/terraform/main.tf
+  when: _ansible_host_file.stat.exists == false or ( _skip_git_flag.stat.exists == false and _skip_kubernetes_flag.stat.exists == false )
 
 - name: Create instance
   ansible.builtin.shell:

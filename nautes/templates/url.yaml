@@ -1,6 +1,6 @@
 gitlab_url: "{{ git_external_url }}"
 vault_url: "{{ vault_url }}"
 oauth_url: "{{ oauth_url }}"
-vcluster_api_server_url: "https://{{ kube_entrypoint_ip }}:{{ vcluster_api_port }}"
+vcluster_api_server_url: "https://{{ vcluster_api_domain }}:{{ vcluster_api_port }}"
 nautes_api_server_url: "https://{{ nautes_api_server_domain }}:31443"
 argocd_url: "{{ argocd_api_url }}"

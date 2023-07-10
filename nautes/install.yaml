@@ -31,10 +31,11 @@
       path: "{{ flag.installation.path }}/{{ flag.installation.name.secret  }}"
     register: secret_completed
 
-- import_playbook: save-user-configs-as-files.yaml
 
 - import_playbook: init.yaml
   when: not hostvars["localhost"].init_completed.stat.exists
+
+- import_playbook: save-user-configs-as-files.yaml
 
 - hosts: localhost
   tasks:

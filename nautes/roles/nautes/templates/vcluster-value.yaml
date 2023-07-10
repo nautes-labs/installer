@@ -5,7 +5,7 @@ sync:
     enabled: true
 syncer:
   extraArgs:
-  - --tls-san={{ hostvars[groups['kube_control_plane'][0]].ansible_host }}
+  - --tls-san={{ vcluster_api_domain }}
 init:
   manifests: |-
     ---

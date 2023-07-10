@@ -1,3 +1,3 @@
-- hosts: "{{ groups['kube_control_plane'][0] }}"
+- hosts: "{{ groups['kube_control_plane'][0] if groups['kube_control_plane'] is defined else 'localhost' }}"
   roles:
     - nautes
