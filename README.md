@@ -107,7 +107,7 @@ curl https://raw.githubusercontent.com/nautes-labs/installer/main/installer.sh |
 
 - 区域：中国香港-可用区B
 - 镜像：Ubuntu 22.04 64位
-- 实例规格：ecs.g5.large(2C8G)
+- 实例规格：ecs.g6.large(2C8G)
 - 系统盘：ESSD云盘 PL0 40G
 - 网络：实例公网IP
 - 数目： 1
@@ -121,9 +121,9 @@ alicloud_save_money: false
 
 两种付费模式的费用预估如下（不包含流量费）：
 
-- 按量付费：56.1￥/天
+- 按量付费：58.2￥/天
 
-- 抢占式实例：13.5￥/天
+- 抢占式实例：16.6￥/天
 
 > 实际产生的费用会受到市场价格波动的影响，以上预估值仅供参考。
 
@@ -235,7 +235,7 @@ kubernetes_node_num: 3
       no_log=true
       local_path_provisioner_enabled=true
 
-    # 如果机器是通过证书SSH访问的，把证书原文填写到以下变量中。
+    # 如果机器是通过证书SSH访问的，把证书原文填写到以下变量中。(这对证书需要能访问到 ansible_inventory_file 中定义的所有机器)
     ansible_ssh_keypair:
       private:
       public:
