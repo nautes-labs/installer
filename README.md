@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![ansible](https://img.shields.io/badge/ansible-v2.12.5-brightgreen)](https://go.dev/doc/install)
-[![version](https://img.shields.io/badge/version-v0.3.1-green)](https://nautes.io)
+[![version](https://img.shields.io/badge/version-v0.3.3-green)](https://nautes.io)
 
 Installer 项目为 Nautes 提供了自动化安装能力，支持基于公有云、私有云、主机、及 Kubernets 集群进行安装，本文档以阿里云为例描述了在公有云安装 Nautes 的过程。
 
@@ -54,13 +54,15 @@ chmod +x installer.sh
 
 /opt/nautes/vars 中存储了用户安装配置文件的缓存。
 
-/opt/nautes/out 中存储了已安装组件的相关信息：
+/opt/nautes/out 中存储了已安装组件的相关信息:
 
 - GitLab 用于托管租户的配置库，用户应用的源代码、部署清单和流水线配置等。GitLab 的管理员密码，以及租户配置库的访问信息等存储在 git 子目录下。
 - Vault 用于存储和管理租户的密钥数据。Vault 的 unseal key 和 root token 存储在 vault 子目录下。
 - Kubernetes 集群用于承载所有的租户管理组件。集群的 kubeconfig 存储在 kubernetes 子目录下。
 - ArgoCD 用于监听租户配置库，并根据仓库中的配置声明向 Kubernetes 集群同步租户配置。ArgoCD 的管理员密码存储在 argocd 子目录下。
 - Dex 用于提供基于 OIDC 协议的统一认证服务。dex 的客户端密钥存储在 kubernetes 子目录下。
+
+> 文件夹中的内容根据安装的方式的不同会有所不同。如：用户自己提供gitlab的情况下，目录中不会有gitlab的管理员密码。
 
 除此之外，/opt/nautes/out 下其他子目录的相关信息：
 
@@ -161,158 +163,134 @@ kubernetes_node_num: 3
 
 用户可以根据自己的情况跳过安装步骤， 例如：用户已经准备好了物理机器，k8s 环境和 gitlab 服务, 可以通过以下命令跳过这些步骤。
 ```shell
-./installer.sh progress skip create_host kubernetes git
+./installer.sh progress skip host kubernetes git
 ```
 
 如果用户需要重新执行已经完成的安装步骤，则可以通过以下命令把步骤标识为未完成的状态。
 
 ```shell
-./installer.sh progress do create_host kubernetes
+./installer.sh progress do host kubernetes
 ./installer.sh install
 ```
 
->该操作只是标识为未完成，没有清理的步骤和执行安装的操作，需要重新执行install命令安装。
+>该操作只是将安装进度标识成未完成，没有清理的步骤或者重新执行安装的操作，需要重新执行install命令安装。
 >
->后续步骤可能依赖前置步骤。只启用前置步骤的重装可能导致环境失效。
+>后续步骤可能依赖前置步骤。只执行前置步骤的重装可能导致环境失效。
 
 查看安装进度及可操作的节点。(部分节点不支持跳过)
 ```shell
 ./installer.sh progress show
-## Install Progress
-#create_host:   clear
-#kubernetes:    clear
-#init:          not clear
-#git:           clear
-#tenant_init:   not clear
-#nautes:        not clear
+> # Install Progress
+> host:          clear
+> kubernetes:    clear
+> git:           clear
+> tenant_init:   not clear
+> nautes:        not clear
 ```
 
-- 跳过创建运行机器
+可操作的安装步骤说明
+| 步骤 | 说明 |
+| --- | --- |
+| host | 创建机器 |
+| kubernetes | 安装 kubernetes |
+| git | 安装 gitlab |
+| tenant_init | 初始化 git 仓库以及创建租户配置库 |
+| nautes | 安装nautes |
 
-    命令：
+- 使用现有机器
+
+    跳过安装步骤的命令：
     ```yaml
-    ./installer.sh progress skip create_host
+    ./installer.sh progress skip host
     ```
 
-    需要补充的文件:
-
-    1. /opt/nautes/out/hosts/ansible_hosts
-        ```yaml
-        # 使用已有的gitlab的情况下可以不用填写gitlab信息
-        [gitlab]
-        gitlab-0 ansible_host=${ gitlab host ip }
-
-        [kube_control_plane]
-        k8s-0 ansible_host=${ k8s host ip }
-
-        [kube_node]
-        k8s-0
-
-        [etcd]
-        k8s-0
-
-        [k8s_cluster:children]
-        kube_control_plane
-        kube_node
-
-        [vault]
-        vault-0 ansible_host=${ vault host ip }
-
-        [all:vars]
-        no_log=true
-        local_path_provisioner_enabled=true
-        ```
-    2. /opt/nautes/out/hosts/id_rsa 和 /opt/nautes/out/hosts/id_rsa.pub
-
-        所有机器可以通过这对密钥访问到root账号。
-
-    备注：目前安装程序在跳过 gitlab 和 k8s 的安装的情况下，依旧会创建对应的机器。
-
- - 跳过安装 kubernetes 集群
-
-    命令：
+    需要在 vars.yaml 中补充的补充的配置项:
     ```yaml
-    ./installer.sh progress skip kubernetes
+    # 机器的访问信息。
+    ansible_inventory_file: |
+      # 如果使用现有的 gitlab, 不要写这一段内容。
+      [gitlab]
+      gitlab-0 ansible_host=${ gitlab host ip }
+      # ========= end =========
+
+      # 如果使用现有的 kubernetes, 不要写这一段内容。
+      [kube_control_plane]
+      k8s-0 ansible_host=${ k8s host ip }
+
+      [kube_node]
+      k8s-0
+
+      [etcd]
+      k8s-0
+
+      [k8s_cluster:children]
+      kube_control_plane
+      kube_node
+      # ========= end =========
+
+      [vault]
+      vault-0 ansible_host=${ vault host ip }
+
+      [all:vars]
+      no_log=true
+      local_path_provisioner_enabled=true
+
+    # 如果机器是通过证书SSH访问的，把证书原文填写到以下变量中。
+    ansible_ssh_keypair:
+      private:
+      public:
     ```
 
-    备注: 需要保证节点 k8s-0 中存在文件 /root/.kube/config，可以通过该文件以管理员身份操作集群。
+ - 使用现有 kubernetes 集群
 
- - 跳过证书生成
+     跳过安装步骤的命令：
+     ```yaml
+     ./installer.sh progress skip kubernetes
+     ```
 
-    步骤说明：该步骤会生成整套系统所需的所有密钥对。具体如下:
-    | 文件名 | 用途 |
-    | --- | --- |
-    | ca.pem | 签发证书的私钥 |
-    | ca.crt | 签发证书的公钥， 下面所有的密钥对都要能通过此文件进行有效性校验 |
-    | API.key | nautes api server 访问 vault proxy 的私钥 |
-    | API.crt | nautes api server 访问 vault proxy 的公钥 |
-    | CLUSTER.key | nautes cluster operator 访问 vault proxy 的私钥 |
-    | CLUSTER.crt | nautes cluster operator 访问 vault proxy 的公钥 |
-    | RUNTIME.key | nautes runtime operator 访问 vault proxy 的私钥 |
-    | RUNTIME.crt | nautes runtime operator 访问 vault proxy 的公钥 |
-    | gitlab-0.key | gitlab https 端口的私钥 |
-    | gitlab-0.crt | gitlab https 端口的公钥 |
-    | vault-0.key | vault 和 vault proxy https 端口的私钥 |
-    | vault-0.crt | vault 和 vault proxy https 端口的公钥 |
-    | entrypoint.key | nautes 服务 https 端口的私钥 |
-    | entrypoint.crt | nautes 服务 https 端口的公钥 |
+     需要在 vars.yaml 中补充的补充的配置项:
+     ```yaml
+     kube_apiserver_kubeconfig: |
+       apiVersion: v1
+       clusters:
+       - cluster:
+           certificate-authority-data: ...
+           server: https://127.0.0.1:6443
+         name: default
+       contexts:
+       - context:
+           cluster: default
+           user: default
+         name: default
+       current-context: default
+       kind: Config
+       users:
+       - name: default
+         user:
+           client-certificate-data: ...
+           client-key-data: ...
+     ```
 
-    命令：
-    ```yaml
-    ./installer.sh progress skip init
-    ```
+     备注: kubeconfig 文件要对应集群的管理员角色。
 
-    需要补充的文件:
+  - 使用现有 Gitlab
 
-    | 文件名 | 备注 |
-    | --- | --- |
-    | /opt/nautes/out/pki/ca.crt |
-    | /opt/nautes/out/pki/API.key |
-    | /opt/nautes/out/pki/API.crt |
-    | /opt/nautes/out/pki/CLUSTER.key |
-    | /opt/nautes/out/pki/CLUSTER.crt |
-    | /opt/nautes/out/pki/RUNTIME.key |
-    | /opt/nautes/out/pki/RUNTIME.crt |
-    | /opt/nautes/out/pki/gitlab-0.key | 通过安装程序部署gitlab时需要提供 |
-    | /opt/nautes/out/pki/gitlab-0.crt | 通过安装程序部署gitlab时需要提供 |
-    | /opt/nautes/out/pki/vault-0.key |
-    | /opt/nautes/out/pki/vault-0.crt |
-    | /opt/nautes/out/pki/entrypoint.key |
-    | /opt/nautes/out/pki/entrypoint.crt |
+      跳过安装步骤的命令：
+      ```yaml
+      ./installer.sh progress skip git
+      ```
 
-    备注:
-    1. 本安装程序暂不支持不同用途的证书使用不同的ca进行签发。
-    2. nautes 服务访问 vault proxy 的密钥对签发请参考[这里](https://github.com/nautes-labs/vault-proxy/blob/main/README.md)。
-    3. entrypoint 密钥对需要签发的域名为 "*.{{ 集群的访问入口 }}"， 在没有修改变量 "kube_entrypoint_domain" 的情况下，默认是 "{{ k8s-0 的 ip }}.nip.io"。
-
-
-  - 跳过安装 gitlab
-
-    命令：
-    ```yaml
-    ./installer.sh progress skip git
-    ```
-
-    需要补充的配置项:
-
-    ```yaml
-    # Git 仓库的 HTTPS 访问地址。
-    git_external_url: "https://127.0.0.1:443"
-    # Git 仓库的 SSH 访问地址。
-    git_ssh_addr: "ssh://git@127.0.0.1:22"
-    # 拥有 api 和 sudo 权限的 token， 用于初始化租户配置库和 Git 仓库的全局配置。
-    git_init_token: ""
-    # Git 仓库的 CA 证书。
-    git_ca: ""
-    ```
-
-  - 创建 nautes 在 git 仓库中所需要的资源 及 租户配置库
-
-    备注：此步骤不支持跳过。
-
-  - 在k8s中安装nautes
-
-    备注：此步骤不支持跳过。
+      需要在 vars.yaml 中补充的补充的配置项:
+      ```yaml
+      # Git 仓库的 HTTPS 访问地址。
+      git_external_url: "https://127.0.0.1:443"
+      # Git 仓库的 SSH 访问地址。
+      git_ssh_addr: "ssh://git@127.0.0.1:22"
+      # 拥有 api 和 sudo 权限的 token， 用于初始化租户配置库和 Git 仓库的全局配置。
+      git_init_token: ""
+      # Git 仓库的 CA 证书。（填写原文）
+      git_ca: ""
+      ```
 
 ## 常见问题
 
