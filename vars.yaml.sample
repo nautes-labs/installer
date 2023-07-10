@@ -1,3 +1,6 @@
+####################################
+# Create hosts
+####################################
 # The access secret of cloud service provider.
 access_key:
 secret_key:
@@ -5,25 +8,91 @@ secret_key:
 # You can customize the cloud server instance type through the following configuration.
 # The cloud server instance type for GitLab
 # gitlab_instance_type: ecs.g5.large
+
 # The cloud server instance type for Kubernetes
 # kubernetes_instance_type: ecs.c6.large
+
 # The cloud server instance type for Vault
 # vault_instance_type: ecs.c6.large
 
 # Region ID of the cloud server.
-region_id: cn-hongkong
+# region_id: cn-hongkong
 # Zone ID of the cloud server.
-zone_id: "cn-hongkong-b"
+# zone_id: "cn-hongkong-b"
 
 # Create cloud server instances using 'Preemptible Instance' by default.
 # alicloud_save_money: true
 
+# If you want to use an existing machine, please provide the following variables
+# ansible_inventory_file: |
+#  [gitlab]
+#  gitlab-0 ansible_host=
+#
+#  [kube_control_plane]
+#  k8s-0 ansible_host=
+#
+#  [kube_node]
+#  k8s-0
+#
+#  [etcd]
+#  k8s-0
+#
+#  [k8s_cluster:children]
+#  kube_control_plane
+#  kube_node
+#
+#  [vault]
+#  vault-0 ansible_host=
+#
+#  [all:vars]
+#  no_log=true
+#  local_path_provisioner_enabled=true
+
+# Keypair used to connect to the server
+# ansible_ssh_keypair:
+#   private:
+#   public:
+
+####################################
+# Kubernetes
+####################################
+# Specify which Kubernetes implementation to use, with options of K3s and K8s.
+# kubernetes_type: k3s
+
+# Specify the number of nodes for Kubernetes. When using K3s, only one node will be used.
+# kubernetes_node_num: 1
+
 # If this variable is defined, k3s installation will use chinese mirror.
 # use_chinese_mirror: ""
 
+# A kubeconfig file with administrator privileges
+# If you need to skip the step of installing k8s, you need to provide this variable
+# kube_apiserver_kubeconfig: |
+#   apiVersion: v1
+#   clusters:
+#   ,,,
+
+
+####################################
+# Code repository
+####################################
+# If user need to use an existing git repository, fill in the following variables.
+# git_external_url: ""
+# git_ssh_addr: ""
+# git_init_token: ""        # init token need scopes [api, sudo]
+# git_ca: ""
+
+####################################
+# Nautes
+####################################
 # Can be set to your company name, department name, or team name, etc.
 # It will be the group name in git registry.
 # tenant_name: "nautes"
+
+# Root certificate used to create business certificate
+# nautes_ca_keypair:
+#   key:
+#   cert:
 
 # The repo name of tenant repo.
 # tenant_project_name: "management"
@@ -52,19 +121,8 @@ zone_id: "cn-hongkong-b"
 # webhook_image: ghcr.io/nautes-labs/webhook:latest
 # vault_proxy_image: ghcr.io/nautes-labs/vault-proxy:latest
 
-# If user need to use an existing git registry, fill in the following variables.
-# git_external_url: ""
-# git_ssh_addr: ""
-# git_init_token: ""
-# git_ca: ""
-
 # The NodePort of tenant management cluster.
 # vcluster_api_port: 32000
-
-# Specify which Kubernetes implementation to use, with options of K3s and K8s.
-# kubernetes_type: k3s
-# Specify the number of nodes for Kubernetes. When using K3s, only one node will be used.
-# kubernetes_node_num: 1
 
 # Repository address and branch of tenant configuration repository template.
 # repos_tenant_template_url: https://github.com/nautes-labs/tenant-repo-template.git

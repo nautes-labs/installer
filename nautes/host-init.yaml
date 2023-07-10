@@ -1,5 +1,44 @@
 ---
 - name: "Create hots"
   hosts: localhost
-  roles:
-   - host-init
+  tasks:
+  - name: Create output folder
+    file:
+      path: "{{ item }}"
+      state: directory
+    loop:
+    - "{{ output_folder }}/"
+    - "{{ output_folder_hosts }}/"
+
+  - name: Check host_init is completed
+    stat:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.host  }}"
+    register: host_init_completed
+
+  - block:
+    - import_role:
+        name: host-init
+      when: ansible_inventory_file is not defined
+
+    - block:
+      - copy:
+          content: "{{ ansible_inventory_file }}"
+          dest: "{{ output_folder_hosts }}/ansible_hosts"
+
+      - copy:
+          content: "{{ item.src }}"
+          dest: "{{ output_folder_hosts }}/{{ item.dest }}"
+          mode: '0400'
+        loop:
+        - { src: "{{ ansible_ssh_keypair.private }}", dest: "id_rsa" }
+        - { src: "{{ ansible_ssh_keypair.public }}", dest: "id_rsa.pub" }
+        when: ansible_ssh_keypair is defined
+
+      when: ansible_inventory_file is defined
+    when: not host_init_completed.stat.exists
+
+  - name: Create host init completed flag
+    file:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.host }}"
+      state: touch
+

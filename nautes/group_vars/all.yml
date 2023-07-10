@@ -33,13 +33,17 @@ vault_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:{{ vault_por
 vault_port: "8200"
 vault_proxy_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:8000"
 
-
 vcluster_api_domain: "{{ kube_entrypoint_domain }}"
 vcluster_api_port: 32000
 
 nautes_api_server_domain: "apiserver.{{ kube_entrypoint_domain }}"
 argocd_dashboard_domain: "argocd.{{ kube_entrypoint_domain }}"
 argocd_api_url: "https://{{ argocd_dashboard_domain }}:31443"
+
+# ansible_inventory_file: ""
+# ansible_ssh_keypair:
+#   private:
+#   public:
 
 output_folder: /opt/out
 output_folder_pki: "{{ output_folder }}/pki"
@@ -61,15 +65,17 @@ flag:
   installation:
     path: "/tmp/flags"
     name:
-      host: "create_host"
+      host: "host"
       kubernetes: "kubernetes"
-      init: "init"
       git: "gitrepo"
       tenant_repo: "tenant_repo"
       nautes: "nautes"
       secret: "secret_store"
  
 nautes_namespace: nautes
+# nautes_ca_keypair:
+#   key:
+#   cert:
 nautes_secret_roles:
   api: "API"
   argo: "ARGO"

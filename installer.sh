@@ -11,9 +11,8 @@ NAUTES_LOG_PATH="${NAUTES_PATH}/out/logs"
 NAUTES_VAR_PATH="${NAUTES_PATH}/vars"
 
 INSTALLATION_PROGRESS_PATH="${NAUTES_PATH}/flags"
-FLAG_CREATE_HOST="create_host"
+FLAG_CREATE_HOST="host"
 FLAG_KUBERNETES="kubernetes"
-FLAG_INSTALLATION_INIT="init"
 FLAG_GIT_REGISTRY="gitrepo"
 FLAG_TENANT_INIT="tenant_repo"
 FLAG_NAUTES="nautes"
@@ -75,11 +74,7 @@ function install() {
     mkdir -p ${INSTALLATION_PROGRESS_PATH}
 
     docker exec -i $CONTAINER_NAME clone-repos | tee -a $LOG_FILE 
-
-    if ! [ -e ${INSTALLATION_PROGRESS_PATH}/$FLAG_CREATE_HOST ]; then
-        docker exec -i $CONTAINER_NAME create-hosts | tee -a $LOG_FILE 
-        touch ${INSTALLATION_PROGRESS_PATH}/$FLAG_CREATE_HOST
-    fi
+    docker exec -i $CONTAINER_NAME create-hosts | tee -a $LOG_FILE 
 
     if ! [ -e ${INSTALLATION_PROGRESS_PATH}/$FLAG_KUBERNETES ]; then
         docker exec -i $CONTAINER_NAME install-k8s | tee -a $LOG_FILE 
@@ -91,17 +86,15 @@ function install() {
 
 function enable_progress() {
     for i in "$@"; do
-        if [ $i = "create_host" ]; then 
+        if [ $i = ${FLAG_CREATE_HOST} ]; then 
             rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_CREATE_HOST} 
-        elif [ $i = "kubernetes" ]; then
+        elif [ $i = ${FLAG_KUBERNETES} ]; then
             rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_KUBERNETES}
-        elif [ $i = "init" ]; then
-            rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_INSTALLATION_INIT}
-        elif [ $i = "git" ]; then
+        elif [ $i = ${FLAG_GIT_REGISTRY} ]; then
             rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_GIT_REGISTRY}
-        elif [ $i = "tenant_init" ]; then
+        elif [ $i = ${FLAG_TENANT_INIT} ]; then
             rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_TENANT_INIT}
-        elif [ $i = "nautes" ]; then
+        elif [ $i = ${FLAG_NAUTES} ]; then
             rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_NAUTES}
         else
             echo "Enable $i is not supported"
@@ -111,13 +104,11 @@ function enable_progress() {
 
 function disable_progress() {
     for i in "$@"; do
-        if [ $i = "create_host" ]; then 
+        if [ $i = ${FLAG_CREATE_HOST} ]; then 
             touch ${INSTALLATION_PROGRESS_PATH}/${FLAG_CREATE_HOST} 
-        elif [ $i = "kubernetes" ]; then
+        elif [ $i = ${FLAG_KUBERNETES} ]; then
             touch ${INSTALLATION_PROGRESS_PATH}/${FLAG_KUBERNETES}
-        elif [ $i = "init" ]; then
-            touch ${INSTALLATION_PROGRESS_PATH}/${FLAG_INSTALLATION_INIT}
-        elif [ $i = "git" ]; then
+        elif [ $i = ${FLAG_GIT_REGISTRY} ]; then
             touch ${INSTALLATION_PROGRESS_PATH}/${FLAG_GIT_REGISTRY}
         else
             echo "Skipping $i is not supported"
@@ -127,16 +118,15 @@ function disable_progress() {
 
 function show_progress() {
     printf "# Install Progress\n"
-    show_one_progress ${INSTALLATION_PROGRESS_PATH}/${FLAG_CREATE_HOST}          "create_host"
-    show_one_progress ${INSTALLATION_PROGRESS_PATH}/${FLAG_KUBERNETES}           "kubernetes"
-    show_one_progress ${INSTALLATION_PROGRESS_PATH}/${FLAG_INSTALLATION_INIT}    "init"
-    show_one_progress ${INSTALLATION_PROGRESS_PATH}/${FLAG_GIT_REGISTRY}         "git"
-    show_one_progress ${INSTALLATION_PROGRESS_PATH}/${FLAG_TENANT_INIT}          "tenant_init"
-    show_one_progress ${INSTALLATION_PROGRESS_PATH}/${FLAG_NAUTES}               "nautes"
+    show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_CREATE_HOST}          
+    show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_KUBERNETES}           
+    show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_GIT_REGISTRY}         
+    show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_TENANT_INIT}          
+    show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_NAUTES}               
 }
 
 function show_one_progress() {
-    if [ -e $1 ]; then
+    if [ -e $1/$2 ]; then
         printf "%-15s${COLOR_GREEN}%s${COLOR_NORMAL}\n" "$2:" "clear"
     else
         printf "%-15s${COLOR_RED}%s${COLOR_NORMAL}\n" "$2:" "not clear"

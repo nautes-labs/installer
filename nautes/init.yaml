@@ -23,40 +23,66 @@
       src: "url.yaml"
       dest: "{{ output_folder_service }}"
 
-  - name: Generate private key
-    openssl_privatekey:
-      path: "{{ output_folder_pki }}/ca.pem"
-      size: 4096
-      type: RSA
+  - block:
+    - name: Generate private key
+      openssl_privatekey:
+        path: "{{ output_folder_pki }}/ca.pem"
+        size: 4096
+        type: RSA
 
-  - name: create the CA CSR
-    openssl_csr:
-      path: "{{ output_folder_pki }}/ca.csr"
-      privatekey_path: "{{ output_folder_pki }}/ca.pem"
-      common_name: "nautes.io"
-      basic_constraints:
-        - 'CA:TRUE'
-      basic_constraints_critical: true
-      key_usage:
-        - keyCertSign
-        - cRLSign
-      key_usage_critical: true
+    - name: Create the CA CSR
+      openssl_csr:
+        path: "{{ output_folder_pki }}/ca.csr"
+        privatekey_path: "{{ output_folder_pki }}/ca.pem"
+        common_name: "nautes.io"
+        basic_constraints:
+          - 'CA:TRUE'
+        basic_constraints_critical: true
+        key_usage:
+          - keyCertSign
+          - cRLSign
+        key_usage_critical: true
 
-  - name: Generate CA
-    community.crypto.x509_certificate:
-      path: "{{ output_folder_pki }}/ca.crt"
-      csr_path: "{{ output_folder_pki }}/ca.csr"
-      privatekey_path: "{{ output_folder_pki }}/ca.pem"
-      provider: selfsigned
+    - name: Generate CA
+      community.crypto.x509_certificate:
+        path: "{{ output_folder_pki }}/ca.crt"
+        csr_path: "{{ output_folder_pki }}/ca.csr"
+        privatekey_path: "{{ output_folder_pki }}/ca.pem"
+        provider: selfsigned
+    when: nautes_ca_keypair is not defined
 
-  - name: Generate keypair
+  - block:
+    - copy: 
+        content: "{{ item.src }}"
+        dest: "{{ output_folder_pki }}/{{ item.dest }}"
+        mode: '0400'
+      loop:
+      - { src: "{{ nautes_ca_keypair.key }}", dest: "ca.pem" }
+      - { src: "{{ nautes_ca_keypair.cert }}", dest: "ca.crt" }
+    when: nautes_ca_keypair is defined
+
+  - block:
+    - name: Create init token file
+      copy:
+        content: "{{ git_init_token }}"
+        dest: "{{ _tmp_file.git.init_token }}"
+      when: git_init_token is defined and git_init_token != ""
+
+    - name: Create git registry ca file
+      copy:
+        content: "{{ git_ca }}"
+        dest: "{{ _tmp_file.git.ca }}"
+      when: git_ca is defined
+    when: groups['gitlab'] is not defined
+ 
+  - name: Generate gitlab keypair
     include_tasks: generate_keypair.yaml
     vars:
       hostname: "{{ item }}"
     loop: "{{ groups['gitlab'] }}"
     when: groups['gitlab'] is defined
 
-  - name: Generate keypair
+  - name: Generate secret repo keypair
     include_tasks: generate_keypair.yaml
     vars:
       hostname: "{{ item }}"

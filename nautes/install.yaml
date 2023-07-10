@@ -6,11 +6,6 @@
       path: "{{ flag.installation.path }}"
       state: directory
 
-  - name: Check init is completed
-    stat:
-      path: "{{ flag.installation.path }}/{{ flag.installation.name.init  }}"
-    register: init_completed
-
   - name: Check git is completed
     stat:
       path: "{{ flag.installation.path }}/{{ flag.installation.name.git  }}"
@@ -33,16 +28,6 @@
 
 
 - import_playbook: init.yaml
-  when: not hostvars["localhost"].init_completed.stat.exists
-
-- import_playbook: save-user-configs-as-files.yaml
-
-- hosts: localhost
-  tasks:
-  - name: Create completed flag
-    file:
-      path: "{{ flag.installation.path }}/{{ flag.installation.name.init }}"
-      state: touch
 
 - import_playbook: gitlab.yaml
   when: not hostvars["localhost"].git_completed.stat.exists
@@ -80,9 +65,9 @@
 - import_playbook: vault-init.yaml
   when: not hostvars["localhost"].secret_completed.stat.exists
 
-- hosts: localhost
-  tasks:
-  - name: Create completed flag
-    file:
-      path: "{{ flag.installation.path }}/{{ flag.installation.name.secret }}"
-      state: touch
+#- hosts: localhost
+#  tasks:
+#  - name: Create completed flag
+#    file:
+#      path: "{{ flag.installation.path }}/{{ flag.installation.name.secret }}"
+#      state: touch
