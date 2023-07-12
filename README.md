@@ -163,13 +163,13 @@ kubernetes_node_num: 3
 
 用户可以根据自己的情况跳过安装步骤， 例如：用户已经准备好了物理机器，k8s 环境和 gitlab 服务, 可以通过以下命令跳过这些步骤。
 ```shell
-./installer.sh progress skip host kubernetes git
+./installer.sh progress skip kubernetes git
 ```
 
 如果用户需要重新执行已经完成的安装步骤，则可以通过以下命令把步骤标识为未完成的状态。
 
 ```shell
-./installer.sh progress do host kubernetes
+./installer.sh progress do kubernetes
 ./installer.sh install
 ```
 
@@ -181,9 +181,8 @@ kubernetes_node_num: 3
 ```shell
 ./installer.sh progress show
 > # Install Progress
-> host:          clear
 > kubernetes:    clear
-> git:           clear
+> gitrepo:       clear
 > tenant_init:   not clear
 > nautes:        not clear
 ```
@@ -191,18 +190,12 @@ kubernetes_node_num: 3
 可操作的安装步骤说明
 | 步骤 | 说明 |
 | --- | --- |
-| host | 创建机器 |
 | kubernetes | 安装 kubernetes |
-| git | 安装 gitlab |
+| gitrepo | 安装 gitlab |
 | tenant_init | 初始化 git 仓库以及创建租户配置库 |
 | nautes | 安装nautes |
 
 - 使用现有机器
-
-    跳过安装步骤的命令：
-    ```yaml
-    ./installer.sh progress skip host
-    ```
 
     需要在 vars.yaml 中补充的配置项:
     ```yaml
@@ -277,7 +270,7 @@ kubernetes_node_num: 3
 
       跳过安装步骤的命令：
       ```yaml
-      ./installer.sh progress skip git
+      ./installer.sh progress skip gitrepo
       ```
 
       需要在 vars.yaml 中补充的配置项:

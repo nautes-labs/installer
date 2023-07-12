@@ -65,7 +65,6 @@ flag:
   installation:
     path: "/tmp/flags"
     name:
-      host: "host"
       kubernetes: "kubernetes"
       git: "gitrepo"
       tenant_repo: "tenant_repo"

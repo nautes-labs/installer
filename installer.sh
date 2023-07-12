@@ -11,7 +11,6 @@ NAUTES_LOG_PATH="${NAUTES_PATH}/out/logs"
 NAUTES_VAR_PATH="${NAUTES_PATH}/vars"
 
 INSTALLATION_PROGRESS_PATH="${NAUTES_PATH}/flags"
-FLAG_CREATE_HOST="host"
 FLAG_KUBERNETES="kubernetes"
 FLAG_GIT_REGISTRY="gitrepo"
 FLAG_TENANT_INIT="tenant_repo"
@@ -86,9 +85,7 @@ function install() {
 
 function enable_progress() {
     for i in "$@"; do
-        if [ $i = ${FLAG_CREATE_HOST} ]; then 
-            rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_CREATE_HOST} 
-        elif [ $i = ${FLAG_KUBERNETES} ]; then
+        if [ $i = ${FLAG_KUBERNETES} ]; then
             rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_KUBERNETES}
         elif [ $i = ${FLAG_GIT_REGISTRY} ]; then
             rm -f ${INSTALLATION_PROGRESS_PATH}/${FLAG_GIT_REGISTRY}
@@ -104,9 +101,7 @@ function enable_progress() {
 
 function disable_progress() {
     for i in "$@"; do
-        if [ $i = ${FLAG_CREATE_HOST} ]; then 
-            touch ${INSTALLATION_PROGRESS_PATH}/${FLAG_CREATE_HOST} 
-        elif [ $i = ${FLAG_KUBERNETES} ]; then
+        if [ $i = ${FLAG_KUBERNETES} ]; then
             touch ${INSTALLATION_PROGRESS_PATH}/${FLAG_KUBERNETES}
         elif [ $i = ${FLAG_GIT_REGISTRY} ]; then
             touch ${INSTALLATION_PROGRESS_PATH}/${FLAG_GIT_REGISTRY}
@@ -118,7 +113,6 @@ function disable_progress() {
 
 function show_progress() {
     printf "# Install Progress\n"
-    show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_CREATE_HOST}          
     show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_KUBERNETES}           
     show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_GIT_REGISTRY}         
     show_one_progress ${INSTALLATION_PROGRESS_PATH} ${FLAG_TENANT_INIT}          

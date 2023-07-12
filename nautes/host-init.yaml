@@ -10,35 +10,27 @@
     - "{{ output_folder }}/"
     - "{{ output_folder_hosts }}/"
 
-  - name: Check host_init is completed
-    stat:
-      path: "{{ flag.installation.path }}/{{ flag.installation.name.host  }}"
-    register: host_init_completed
+  - name: Display var "ansible_inventory_file" is defined
+    debug:
+      msg: "{{ ansible_inventory_file is defined }}"
 
-  - block:
-    - import_role:
-        name: host-init
-      when: ansible_inventory_file is not defined
+  - import_role:
+      name: host-init
+    when: ansible_inventory_file is not defined
 
-    - block:
-      - copy:
-          content: "{{ ansible_inventory_file }}"
-          dest: "{{ output_folder_hosts }}/ansible_hosts"
+  - name: Create inventory file from vars
+    copy:
+      content: "{{ ansible_inventory_file }}"
+      dest: "{{ output_folder_hosts }}/ansible_hosts"
+    when: ansible_inventory_file is defined
 
-      - copy:
-          content: "{{ item.src }}"
-          dest: "{{ output_folder_hosts }}/{{ item.dest }}"
-          mode: '0400'
-        loop:
-        - { src: "{{ ansible_ssh_keypair.private }}", dest: "id_rsa" }
-        - { src: "{{ ansible_ssh_keypair.public }}", dest: "id_rsa.pub" }
-        when: ansible_ssh_keypair is defined
-
-      when: ansible_inventory_file is defined
-    when: not host_init_completed.stat.exists
-
-  - name: Create host init completed flag
-    file:
-      path: "{{ flag.installation.path }}/{{ flag.installation.name.host }}"
-      state: touch
+  - name: Create ssh keypair from vars
+    copy:
+      content: "{{ item.src }}"
+      dest: "{{ output_folder_hosts }}/{{ item.dest }}"
+      mode: '0400'
+    loop:
+    - { src: "{{ ansible_ssh_keypair.private }}", dest: "id_rsa" }
+    - { src: "{{ ansible_ssh_keypair.public }}", dest: "id_rsa.pub" }
+    when: ansible_ssh_keypair is defined
 
