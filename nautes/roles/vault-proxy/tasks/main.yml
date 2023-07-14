@@ -9,6 +9,10 @@
     role_id: "{{ infos[0].roleID }}"
     secret_id: "{{ infos[0].secretID }}"
 
+- name: Install requests python pacakge
+  ansible.builtin.pip:
+    name: requests==2.28.1
+
 - name: Ensure destination directory exists
   file:
     path: "{{ item }}"

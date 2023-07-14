@@ -20,10 +20,3 @@
       - "apt-daily-upgrade.timer"
       ignore_errors: yes
 
-- hosts: localhost
-  tasks:
-  - name: Create host init completed flag
-    file:
-      path: "{{ flag.installation.path }}/{{ flag.installation.name.host }}"
-      state: touch
-
