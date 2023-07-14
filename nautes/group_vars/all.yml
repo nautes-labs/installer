@@ -2,45 +2,92 @@
 tenant_name: "nautes"
 
 # Don't modify without knowing what you are doing
-kube_entrypoint_ip: "{{ hostvars[groups['kube_control_plane'][0]].ansible_host }}"
-kube_entrypoint_domain: "{{ kube_entrypoint_ip }}.nip.io"
+kube_entrypoint_ip: "{% if groups['kube_control_plane'] is defined and groups['kube_control_plane'] | length != 0 -%}
+{{ hostvars[groups['kube_control_plane'][0]].ansible_host }}
+{%- else -%}{%- endif %}"
+
+# kube_apiserver_kubeconfig: ""
+_kube_apiserver_domain: "{{ kube_apiserver_kubeconfig | default('') | from_yaml | json_query('clusters[0].cluster.server') | regex_search('https?://([\\w\\d.-]+)') | regex_replace('^https?://', '') }}"
+_kube_apiserver_domain_is_ip: "{{ true if _kube_apiserver_domain.split('.') | length == 4 and _kube_apiserver_domain.split('.') | map('int')|map('string') | join('.') == _kube_apiserver_domain else false }}"
+
+kube_entrypoint_domain: "{% if kube_entrypoint_ip != '' -%}
+{{ kube_entrypoint_ip }}.nip.io
+{%- elif kube_apiserver_kubeconfig is defined -%}
+{{ _kube_apiserver_domain }}{% if _kube_apiserver_domain_is_ip %}.nip.io{% endif %}{%- endif -%}"
 
 oauth_domain: "dex.{{ kube_entrypoint_domain }}"
 oauth_url: "https://{{ oauth_domain }}:31443"
-oauth_source_url: "{{ gitlab_external_url }}"
+oauth_source_url: "{{ git_external_url }}"
 
 gitlab_ip: "{{ hostvars[groups['gitlab'][0]].ansible_host }}"
 gitlab_port: 31443
-gitlab_external_url: "https://{{ gitlab_ip }}:{{ gitlab_port }}"
-gitlab_ssh_addr: "ssh://git@{{ gitlab_ip }}:{{ gitlab_ssh_port }}"
-gitlab_ssh_port: 22
+gitlab_ssh_port: "{{ ansible_ssh_port | default(22) }}"
 
-vault_port: "8200"
+git_registry_type: "gitlab"
+git_external_url: "https://{{ gitlab_ip }}:{{ gitlab_port }}"
+git_ssh_addr: "ssh://git@{{ gitlab_ip }}:{{ gitlab_ssh_port }}"
+# git_init_token: 
+# git_ca:
+
 vault_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:{{ vault_port }}"
+vault_port: "8200"
 vault_proxy_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:8000"
 
+vcluster_api_domain: "{{ kube_entrypoint_domain }}"
 vcluster_api_port: 32000
-nautes_api_server_domain: "apiserver.{{ kube_entrypoint_ip }}.nip.io"
+
+nautes_api_server_domain: "apiserver.{{ kube_entrypoint_domain }}"
+argocd_dashboard_domain: "argocd.{{ kube_entrypoint_domain }}"
 argocd_api_url: "https://{{ argocd_dashboard_domain }}:31443"
-argocd_dashboard_domain: "argocd.{{ kube_entrypoint_ip }}.nip.io"
+
+# ansible_inventory_file: ""
+# ansible_ssh_keypair:
+#   private:
+#   public:
 
 output_folder: /opt/out
 output_folder_pki: "{{ output_folder }}/pki"
-output_folder_gitrepo: "{{ output_folder }}/gitlab"
+output_folder_gitrepo: "{{ output_folder }}/git"
 output_folder_hosts: "{{ output_folder }}/hosts"
 output_folder_k8s: "{{ output_folder }}/kubernetes"
 output_folder_secrepo: "{{ output_folder }}/vault"
 output_folder_service: "{{ output_folder }}/service"
 
-repos:
-  tenant_template:
-    url: https://github.com/nautes-labs/tenant-repo-template.git
-    version: main
-  cluster_template:
-    url: https://github.com/nautes-labs/cluster-templates.git
-  role_vault:
-    url: https://github.com/ansible-community/ansible-vault.git
-    version: master
-  role_gitlab:
-    url: https://github.com/geerlingguy/ansible-role-gitlab.git
-    version: master
+repos_tenant_template_url: https://github.com/nautes-labs/tenant-repo-template.git
+repos_tenant_template_version: main
+repos_cluster_template_url: https://github.com/nautes-labs/cluster-templates.git
+repos_role_vault_url: https://github.com/ansible-community/ansible-vault.git
+repos_role_vault_version: master
+repos_role_gitlab_url: https://github.com/geerlingguy/ansible-role-gitlab.git
+repos_role_gitlab_version: master
+
+flag:
+  installation:
+    path: "/tmp/flags"
+    name:
+      kubernetes: "kubernetes"
+      git: "gitrepo"
+      tenant_repo: "tenant_repo"
+      nautes: "nautes"
+      secret: "secret_store"
+ 
+nautes_namespace: nautes
+# nautes_ca_keypair:
+#   key:
+#   cert:
+nautes_secret_roles:
+  api: "API"
+  argo: "ARGO"
+  base: "BASE"
+  cluster: "CLUSTER"
+  repo: "REPO"
+  runtime: "RUNTIME"
+
+_tmp_file:
+  git:
+    init_token: "{{ output_folder_gitrepo }}/init_token"
+    fingerprint: /tmp/git_fingers.yaml
+    ca: /tmp/git_ca.crt
+  secret:
+    ca: /tmp/sec_ca.crt
+ 

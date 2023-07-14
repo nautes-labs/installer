@@ -6,22 +6,21 @@ region_id: cn-hongkong
 zone_id: "{{ region_id }}-b"
 instance_type: ecs.c6.large
 
-gitlab_instance_type: "ecs.g5.large"
+gitlab_instance_type: "ecs.g6.large"
+
 kubernetes_instance_type: "{{ instance_type }}"
+kubernetes_type: k3s
+kubernetes_node_num: 1
+
 vault_instance_type: "{{ instance_type }}"
 harbor_instance_type: "{{ instance_type }}"
 
-alicloud:
-  save_money: true 
+alicloud_save_money: true 
 
 ansible_host_source: "/tmp/ansible-host-vars"
 
-host_type:
+_host_type:
   git: "git"
   kubernetes: "kubernetes"
   secret: "secret"
 
-deploy:
-  kubernetes:
-    type: k3s
-    node_num: 1

@@ -1,8 +1,11 @@
+{% if not _skip_git_flag.stat.exists %}
 [gitlab]
 {% for host in gits %}
 {{ host.name }} ansible_host={{ host.host }}
 {% endfor %}
+{% endif %}
 
+{% if not _skip_kubernetes_flag.stat.exists %}
 [kube_control_plane]
 {% for host in kubernetes %}
 {{ host.name }} ansible_host={{ host.host }}
@@ -21,6 +24,7 @@
 [k8s_cluster:children]
 kube_control_plane
 kube_node
+{% endif %}
 
 [vault]
 {% for host in secrets %}

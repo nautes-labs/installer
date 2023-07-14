@@ -1,0 +1,36 @@
+---
+- name: "Create hots"
+  hosts: localhost
+  tasks:
+  - name: Create output folder
+    file:
+      path: "{{ item }}"
+      state: directory
+    loop:
+    - "{{ output_folder }}/"
+    - "{{ output_folder_hosts }}/"
+
+  - name: Display var "ansible_inventory_file" is defined
+    debug:
+      msg: "{{ ansible_inventory_file is defined }}"
+
+  - import_role:
+      name: host-init
+    when: ansible_inventory_file is not defined
+
+  - name: Create inventory file from vars
+    copy:
+      content: "{{ ansible_inventory_file }}"
+      dest: "{{ output_folder_hosts }}/ansible_hosts"
+    when: ansible_inventory_file is defined
+
+  - name: Create ssh keypair from vars
+    copy:
+      content: "{{ item.src }}"
+      dest: "{{ output_folder_hosts }}/{{ item.dest }}"
+      mode: '0400'
+    loop:
+    - { src: "{{ ansible_ssh_keypair.private }}", dest: "id_rsa" }
+    - { src: "{{ ansible_ssh_keypair.public }}", dest: "id_rsa.pub" }
+    when: ansible_ssh_keypair is defined
+

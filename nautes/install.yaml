@@ -1,7 +1,73 @@
 ---
+- hosts: localhost
+  tasks:
+  - name: Create flags path
+    file:
+      path: "{{ flag.installation.path }}"
+      state: directory
+
+  - name: Check git is completed
+    stat:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.git  }}"
+    register: git_completed
+
+  - name: Check tenant_repo is completed
+    stat:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.tenant_repo  }}"
+    register: tenant_repo_completed
+
+  - name: Check nautes is completed
+    stat:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.nautes  }}"
+    register: nautes_completed
+
+  - name: Check secret is completed
+    stat:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.secret  }}"
+    register: secret_completed
+
+
 - import_playbook: init.yaml
+
 - import_playbook: gitlab.yaml
-- import_playbook: push-git.yaml
+  when: not hostvars["localhost"].git_completed.stat.exists
+
+- hosts: localhost
+  tasks:
+  - name: Create completed flag
+    file:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.git }}"
+      state: touch
+
+- import_playbook: repo-init.yaml
+  when: not hostvars["localhost"].tenant_repo_completed.stat.exists
+
+- hosts: localhost
+  tasks:
+  - name: Create completed flag
+    file:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.tenant_repo }}"
+      state: touch
+
 - import_playbook: nautes.yaml
+  when: not hostvars["localhost"].nautes_completed.stat.exists
+
+- hosts: localhost
+  tasks:
+  - name: Create completed flag
+    file:
+      path: "{{ flag.installation.path }}/{{ flag.installation.name.nautes }}"
+      state: touch
+
 - import_playbook: vault.yaml
+  when: not hostvars["localhost"].secret_completed.stat.exists
+
 - import_playbook: vault-init.yaml
+  when: not hostvars["localhost"].secret_completed.stat.exists
+
+#- hosts: localhost
+#  tasks:
+#  - name: Create completed flag
+#    file:
+#      path: "{{ flag.installation.path }}/{{ flag.installation.name.secret }}"
+#      state: touch

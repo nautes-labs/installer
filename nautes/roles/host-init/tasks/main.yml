@@ -1,3 +1,15 @@
+- stat:
+    path: "{{ output_folder_hosts }}/ansible_hosts"
+  register: _ansible_host_file
+
+- stat:
+    path: "{{ flag.installation.path }}/{{ flag.installation.name.git }}"
+  register: _skip_git_flag
+
+- stat:
+    path: "{{ flag.installation.path }}/{{ flag.installation.name.kubernetes }}"
+  register:  _skip_kubernetes_flag
+
 - name: Ensure destination directory exists
   file:
     path: /tmp/terraform
@@ -25,6 +37,7 @@
   template:
     src: main.tf.j2
     dest: /tmp/terraform/main.tf
+  when: _ansible_host_file.stat.exists == false or ( _skip_git_flag.stat.exists == false and _skip_kubernetes_flag.stat.exists == false )
 
 - name: Create instance
   ansible.builtin.shell:
@@ -39,19 +52,19 @@
   set_fact: 
     gits: "{{ gits | default([]) + [item] }}"
   loop: "{{ terraform_hosts }}"
-  when: item.type == host_type.git
+  when: item.type == _host_type.git
 
 - name: Grep kubernetes hosts from host info
   set_fact: 
     kubernetes: "{{ kubernetes | default([]) + [item] }}"
   loop: "{{ terraform_hosts }}"
-  when: item.type == host_type.kubernetes
+  when: item.type == _host_type.kubernetes
 
 - name: Grep secret hosts from host info
   set_fact: 
     secrets: "{{ secrets | default([]) + [item] }}"
   loop: "{{ terraform_hosts }}"
-  when: item.type == host_type.secret
+  when: item.type == _host_type.secret
 
 - name: Create file from template
   template:

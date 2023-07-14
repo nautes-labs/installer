@@ -1,1 +1,0 @@
-nautes_api_server_domain: "apiserver.{{ kube_entrypoint_ip }}.nip.io"

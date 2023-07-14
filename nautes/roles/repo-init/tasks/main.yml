@@ -1,13 +1,67 @@
+- set_fact:
+    init_token: "{{ lookup('file', _tmp_file.git.init_token) }}"
+    git_ca: "{{ lookup('file', _tmp_file.git.ca) }}"
+ 
+- set_fact:
+    sec_ca: "{{ lookup('file', '{{ output_folder_pki }}/ca.crt') }}"
+
+- set_fact:
+    git_http_domain: '{{ git_external_url | urlsplit("hostname") }}'
+    git_http_port: '{{ git_external_url | urlsplit("port") | default("443") }}'
+ 
+- set_fact:
+    git_http_domain: '{{ git_http_domain }}_{{ git_http_port }}'
+  when: git_http_port != 443
+
+- set_fact:
+    git_ssh_port: '{{ git_ssh_addr | urlsplit("port")  | default("22") }}'
+    git_ssh_hostname: '{{ git_ssh_addr | urlsplit("hostname") }}'
+
+- name: Get public key
+  shell: ssh-keyscan -p "{{ git_ssh_port }}" "{{ git_ssh_hostname }}"
+  register: public_key
+
+- set_fact:
+    git_ssh_knowhosts: "{{ public_key.stdout }}"
+
+- name: Wait until HTTP status is 200
+  uri:
+    url: '{{ git_external_url }}'
+    return_content: yes
+    validate_certs: no
+    status_code:
+      - 200
+  until: uri_output.status == 200
+  retries: 24 
+  delay: 5 
+  register: uri_output
+
+- name: Init gitlab
+  shell: |
+    python ./scripts/init-gitlab.py \
+     --token "{{ init_token }}" \
+     --gitlab_url "{{ git_external_url }}" \
+     --group_name {{ tenant_name }} \
+     --project_name "{{ tenant_project_name }}" \
+     --app_call_back_url "{{ oauth_url }}/callback" \
+     --app_name "{{ oauth_app_name }}" \
+     --access_token_name "{{ base_opeartor_access_token_name }}"
+
+- name: Change file permissions
+  file:
+    path: "{{ output_folder_gitrepo }}/tenant_repo_private.key"
+    mode: '0600'
+
 - name: Add block of lines to /etc/hosts
   blockinfile:
     path: /etc/ssh/ssh_config
     block: |
-      Host {{ gitlab_ip }}
+      Host {{ git_ssh_hostname }}
           PasswordAuthentication yes
           StrictHostKeyChecking no
           UserKnownHostsFile /dev/null
           IdentityFile /root/.ssh/id_rsa
-          IdentityFile {{ output_folder_gitrepo }}/tenante_repo_private.key
+          IdentityFile {{ output_folder_gitrepo }}/tenant_repo_private.key
     state: present
 
 - name: Git config
@@ -25,14 +79,13 @@
   when: not dex_client_secret_file.stat.exists
 
 - set_fact:
-    tenant_repo_id: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_id' ) }}"
-    tenant_repo_ssh_addr: "{{ lookup('file', '{{ output_folder_gitrepo }}/tenante_repo_ssh_addr' ) }}"
-    ca_info: "{{ lookup('file', '{{ output_folder_pki }}/ca.crt' ) }}"
-    gitlab_knowhost_rsa: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_rsa_key.pub' ) }}"
-    gitlab_knowhost_ecdsa: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_ecdsa_key.pub' ) }}"
-    gitlab_knowhost_ed25519: "{{ lookup('file', '{{ output_folder_gitrepo }}/ssh_host_ed25519_key.pub' ) }}"
-    oauth_clientID: "{{ lookup('file', '{{ output_folder_gitrepo }}/client_id' ) }}"
-    oauth_client_secret: "{{ lookup('file', '{{ output_folder_gitrepo }}/client_sercret' ) }}"
+    git_info: "{{ lookup('file', '{{ output_folder_gitrepo }}/infos.yaml' )| from_yaml }}"
+
+- set_fact:
+    tenant_repo_id: "{{ git_info.tenant_repo_id }}"
+    tenant_repo_ssh_addr: "{{ git_info.tenant_repo_ssh_addr }}"
+    oauth_clientID: "{{ git_info.client_id }}"
+    oauth_client_secret: "{{ git_info.client_sercret }}"
     dex_client_secret: "{{ lookup('file', '{{ output_folder_k8s }}/dex_client_secret' ) }}"
     
 - name: Load template file list
