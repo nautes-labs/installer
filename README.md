@@ -163,7 +163,7 @@ kubernetes_node_num: 3
 
 用户可以根据自己的情况跳过安装步骤， 例如：用户已经准备好了物理机器，k8s 环境和 gitlab 服务, 可以通过以下命令跳过这些步骤。
 ```shell
-./installer.sh progress skip kubernetes git
+./installer.sh progress skip kubernetes gitrepo
 ```
 
 如果用户需要重新执行已经完成的安装步骤，则可以通过以下命令把步骤标识为未完成的状态。
