@@ -46,7 +46,7 @@ roleList:
   policies:
   - api-server
   k8sServiceAccountList:
-  - name: api-server-manager
+  - name: api-server
     namespace: "{{ nautes_namespace }}"
 
 - name: "{{ nautes_secret_roles.argo }}"
@@ -54,7 +54,7 @@ roleList:
   policies:
   - argo-operator
   k8sServiceAccountList:
-  - name: argo-controller-manager
+  - name: argo-controller-server
     namespace: "{{ nautes_namespace }}"
 
 - name: "{{ nautes_secret_roles.base }}"
@@ -62,7 +62,7 @@ roleList:
   policies:
   - base-operator
   k8sServiceAccountList:
-  - name: base-controller-manager
+  - name: base-controller-server
     namespace: "{{ nautes_namespace }}"
 
 - name: "{{ nautes_secret_roles.cluster }}"
@@ -70,7 +70,7 @@ roleList:
   policies:
   - cluster-operator
   k8sServiceAccountList:
-  - name: cluster-controller-manager
+  - name: cluster-controller-server
     namespace: "{{ nautes_namespace }}"
 
 - name: "{{ nautes_secret_roles.repo }}"
@@ -78,13 +78,13 @@ roleList:
   policies:
   - repo-operator
   k8sServiceAccountList:
-  - name: repo-controller-manager
+  - name: repo-controller-server
     namespace: "{{ nautes_namespace }}"
 
 - name: "{{ nautes_secret_roles.runtime }}"
   authName: "{{ tenant_name }}"
   k8sServiceAccountList:
-  - name: runtime-controller-manager
+  - name: runtime-controller-server
     namespace: "{{ nautes_namespace }}"
 # ================================================================
 policyList:

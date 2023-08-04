@@ -113,12 +113,7 @@ secret_key:
 # image_version: latest
 
 # You can customize the image address through the following configuration.
-# api_server_image: ghcr.io/nautes-labs/api-server:latest
-# argo_operator_image: ghcr.io/nautes-labs/argo-operator:latest
-# base_operator_image: ghcr.io/nautes-labs/base-operator:latest
-# cluster_operator_image: ghcr.io/nautes-labs/cluster-operator:latest
-# runtime_operator_image: ghcr.io/nautes-labs/runtime-operator:latest
-# webhook_image: ghcr.io/nautes-labs/webhook:latest
+# nautes_image_name: ghcr.io/nautes-labs/nautes
 # vault_proxy_image: ghcr.io/nautes-labs/vault-proxy:latest
 
 # The NodePort of tenant management cluster.

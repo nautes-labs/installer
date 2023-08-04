@@ -29,9 +29,11 @@ git_ssh_addr: "ssh://git@{{ gitlab_ip }}:{{ gitlab_ssh_port }}"
 # git_init_token: 
 # git_ca:
 
-vault_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:{{ vault_port }}"
+vault_domain: "{{ hostvars[groups['vault'][0]].ansible_host }}"
+vault_url: "https://{{ vault_domain }}:{{ vault_port }}"
 vault_port: "8200"
-vault_proxy_url: "https://{{ hostvars[groups['vault'][0]].ansible_host }}:8000"
+vault_proxy_url: "https://{{ vault_domain }}:{{ vault_proxy_port }}"
+vault_proxy_port: "8000"
 
 vcluster_api_domain: "{{ kube_entrypoint_domain }}"
 vcluster_api_port: 32000

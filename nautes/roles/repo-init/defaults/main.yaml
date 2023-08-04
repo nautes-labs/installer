@@ -1,12 +1,9 @@
 template_path: /opt/management
+
 docker_repository: ghcr.io/nautes-labs/
+
+nautes_image_name: "{{ docker_repository }}nautes"
 image_version: latest
-api_server_image: "{{ docker_repository }}api-server:{{ image_version }}"
-argo_operator_image: "{{ docker_repository }}argo-operator:{{ image_version }}"
-base_operator_image: "{{ docker_repository }}base-operator:{{ image_version }}"
-cluster_operator_image: "{{ docker_repository }}cluster-operator:{{ image_version }}"
-runtime_operator_image: "{{ docker_repository }}runtime-operator:{{ image_version }}"
-webhook_image: "{{ docker_repository }}webhook:{{ image_version }}"
 
 tenant_project_name: "management"
 oauth_app_name: "nautes"

@@ -1,14 +1,17 @@
 - hosts: localhost
   tasks:
-  - ansible.builtin.git:
+  - name: "Clone tenant repo"
+    ansible.builtin.git:
       repo: "{{ repos_tenant_template_url }}"
       dest: /opt/management
       version: "{{ repos_tenant_template_version }}"
-  - ansible.builtin.git:
+  - name: "Clone vault role"
+    ansible.builtin.git:
       repo: "{{ repos_role_vault_url }}"
       dest: /opt/nautes/roles/ansible-vault
       version: "{{ repos_role_vault_version }}"
-  - ansible.builtin.git:
+  - name: "Clone gitlab role"
+    ansible.builtin.git:
       repo: "{{ repos_role_gitlab_url }}"
       dest: /opt/nautes/roles/gitlab
       version: "{{ repos_role_gitlab_version }}"
