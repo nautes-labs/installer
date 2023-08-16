@@ -62,7 +62,7 @@ secret_key:
 # Specify the number of nodes for Kubernetes. When using K3s, only one node will be used.
 # kubernetes_node_num: 1
 
-# If this variable is defined, k3s installation will use chinese mirror.
+# If user wants to install k3s from chinese mirror, uncomment the following line. For detailed instructions, please refer to https://docs.rancher.cn/docs/k3s/quick-start/_index/
 # use_chinese_mirror: ""
 
 # A kubeconfig file with administrator privileges

@@ -174,8 +174,6 @@ kubernetes_node_num: 3
 ```
 
 >该操作只是将安装进度标识成未完成，没有清理的步骤或者重新执行安装的操作，需要重新执行install命令安装。
->
->后续步骤可能依赖前置步骤。只执行前置步骤的重装可能导致环境失效。
 
 查看安装进度及可操作的节点。(部分节点不支持跳过)
 ```shell
@@ -207,6 +205,9 @@ kubernetes_node_num: 3
       # ========= end =========
 
       # 如果使用现有的 kubernetes, 不要写这一段内容。
+      # 以下模板支持 k3s 和 k8s 的安装。
+      # k3s 部署目前只支持单节点。
+      # 部署 k8s 时，可以支持更加复杂的部署逻辑。详细请参考 https://github.com/kubernetes-sigs/kubespray/blob/master/docs/ansible.md#inventory
       [kube_control_plane]
       k8s-0 ansible_host=${ k8s host ip }
 
